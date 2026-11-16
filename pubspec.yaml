@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_v2ray: ^1.1.6        # Android core (Xray): VLESS/VMess/Trojan/Shadowsocks
+  flutter_v2ray: ^2.0.0        # Android core (Xray): VLESS/VMess/Trojan/Shadowsocks
   shared_preferences: ^2.2.3   # local persistence (servers, subs, settings)
   http: ^1.2.1                 # fetch subscription contents
   mobile_scanner: ^5.2.3       # QR import
