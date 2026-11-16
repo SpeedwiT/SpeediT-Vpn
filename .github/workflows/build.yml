@@ -105,7 +105,7 @@ jobs:
 
   # ------------------------------------------------------------------ Release
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     needs: [android, windows]
     runs-on: ubuntu-latest
     permissions:
@@ -115,8 +115,10 @@ jobs:
         with: { name: android, path: dist }
       - uses: actions/download-artifact@v4
         with: { name: windows, path: dist }
-      - name: Publish release
+      - name: Publish release (creates the v1.0.0 tag server-side)
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v1.0.0
+          name: SpeediT v1.0.0
           files: dist/*
           generate_release_notes: true
