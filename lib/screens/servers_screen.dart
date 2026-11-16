@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../l10n/strings.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
+import '../widgets/add_menu.dart';
 import '../widgets/ui_kit.dart';
 
 class ServersScreen extends StatelessWidget {
@@ -20,23 +21,25 @@ class ServersScreen extends StatelessWidget {
           title: Text(s.t('servers')),
           actions: [
             if (state.servers.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(right: 8, left: 8),
-                child: TextButton.icon(
-                  style: TextButton.styleFrom(foregroundColor: c.text),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(s.t('ping_all'))));
-                    state.pingAll();
-                  },
-                  icon: const Icon(Icons.speed_rounded, size: 18),
-                  label: Text(s.t('ping_all')),
-                ),
+              IconButton(
+                tooltip: s.t('ping_all'),
+                icon: const Icon(Icons.speed_rounded),
+                onPressed: () {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(s.t('ping_all'))));
+                  state.pingAll();
+                },
               ),
+            IconButton(
+              tooltip: s.t('add_config'),
+              icon: const Icon(Icons.add_rounded),
+              onPressed: () => showAddMenu(context, state),
+            ),
+            const SizedBox(width: 4),
           ],
         ),
         body: state.servers.isEmpty
-            ? _empty(context, s, c)
+            ? _empty(context, s, c, state)
             : ListView.builder(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 itemCount: state.servers.length,
@@ -102,7 +105,7 @@ class ServersScreen extends StatelessWidget {
     );
   }
 
-  Widget _empty(BuildContext context, S s, AppColors c) => Center(
+  Widget _empty(BuildContext context, S s, AppColors c, AppState state) => Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: FadeSlideIn(
@@ -115,6 +118,12 @@ class ServersScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: c.text)),
                 const SizedBox(height: 8),
                 Text(s.t('no_servers_hint'), textAlign: TextAlign.center, style: TextStyle(color: c.textDim)),
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  onPressed: () => showAddMenu(context, state),
+                  icon: const Icon(Icons.add_rounded),
+                  label: Text(s.t('add_sub')),
+                ),
               ],
             ),
           ),

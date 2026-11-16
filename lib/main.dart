@@ -60,7 +60,6 @@ class _RootShellState extends State<RootShell> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: c.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: Scaffold(
-        extendBody: true,
         body: SafeArea(
           bottom: false,
           child: AnimatedSwitcher(

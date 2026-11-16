@@ -1,8 +1,9 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-/// Frosted-glass, raised 3D panel used across the app.
+/// Raised 3D panel with a translucent "glass" look — WITHOUT a runtime blur.
+/// (BackdropFilter blur is very GPU-heavy, especially in lists; a translucent
+/// fill + border + soft shadow gives the same look while staying perfectly smooth.)
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -23,25 +24,19 @@ class GlassCard extends StatelessWidget {
     final c = AppColors.of(context);
     return Padding(
       padding: margin,
-      child: ClipRRect(
+      child: Material(
+        color: c.surface,
         borderRadius: BorderRadius.circular(radius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: c.glass,
               borderRadius: BorderRadius.circular(radius),
               border: Border.all(color: c.line),
               boxShadow: c.lift,
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onTap,
-                borderRadius: BorderRadius.circular(radius),
-                child: Padding(padding: padding, child: child),
-              ),
-            ),
+            child: Padding(padding: padding, child: child),
           ),
         ),
       ),
@@ -49,60 +44,39 @@ class GlassCard extends StatelessWidget {
   }
 }
 
-/// Subtle animated monochrome backdrop — slow-drifting blurred blobs + grain.
-class AnimatedBackground extends StatefulWidget {
+/// Static, cheap monochrome backdrop — two soft radial blobs, no animation,
+/// so every screen stays smooth. (Repainting a full-screen gradient each frame
+/// was the main source of jank.)
+class AnimatedBackground extends StatelessWidget {
   final Widget child;
   const AnimatedBackground({super.key, required this.child});
-  @override
-  State<AnimatedBackground> createState() => _AnimatedBackgroundState();
-}
-
-class _AnimatedBackgroundState extends State<AnimatedBackground>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _c =
-      AnimationController(vsync: this, duration: const Duration(seconds: 14))..repeat();
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final blob = c.isDark ? Colors.white : Colors.black;
-    return Stack(
-      children: [
-        Positioned.fill(child: ColoredBox(color: c.bg)),
-        AnimatedBuilder(
-          animation: _c,
-          builder: (context, _) {
-            final t = _c.value;
-            return Stack(children: [
-              _blob(blob.withValues(alpha: c.isDark ? 0.06 : 0.05), 360,
-                  Alignment(0.9 - t * 0.3, -0.9 + t * 0.2)),
-              _blob(blob.withValues(alpha: c.isDark ? 0.05 : 0.04), 300,
-                  Alignment(-0.9 + t * 0.4, 0.9 - t * 0.3)),
-            ]);
-          },
+    final blob = (c.isDark ? Colors.white : Colors.black);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: const Alignment(0.85, -0.85),
+          radius: 1.2,
+          colors: [blob.withValues(alpha: c.isDark ? 0.05 : 0.04), c.bg],
+          stops: const [0.0, 0.7],
         ),
-        Positioned.fill(child: widget.child),
-      ],
-    );
-  }
-
-  Widget _blob(Color color, double size, Alignment align) => Align(
-        alignment: align,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: RadialGradient(colors: [color, color.withValues(alpha: 0)]),
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: const Alignment(-0.9, 0.9),
+            radius: 1.1,
+            colors: [blob.withValues(alpha: c.isDark ? 0.04 : 0.03), Colors.transparent],
+            stops: const [0.0, 0.6],
           ),
         ),
-      );
+        child: child,
+      ),
+    );
+  }
 }
 
 /// One-shot entrance: fades + slides up, with an optional stagger [delayMs].
@@ -110,16 +84,15 @@ class FadeSlideIn extends StatefulWidget {
   final Widget child;
   final int delayMs;
   final double offsetY;
-  const FadeSlideIn({super.key, required this.child, this.delayMs = 0, this.offsetY = 24});
+  const FadeSlideIn({super.key, required this.child, this.delayMs = 0, this.offsetY = 20});
   @override
   State<FadeSlideIn> createState() => _FadeSlideInState();
 }
 
 class _FadeSlideInState extends State<FadeSlideIn> with SingleTickerProviderStateMixin {
   late final AnimationController _c =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 520));
-  late final Animation<double> _a =
-      CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 420));
+  late final Animation<double> _a = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
 
   @override
   void initState() {
@@ -137,13 +110,12 @@ class _FadeSlideInState extends State<FadeSlideIn> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _a,
-      builder: (context, child) => Opacity(
-        opacity: _a.value,
-        child: Transform.translate(offset: Offset(0, (1 - _a.value) * widget.offsetY), child: child),
+    return FadeTransition(
+      opacity: _a,
+      child: SlideTransition(
+        position: Tween<Offset>(begin: Offset(0, widget.offsetY / 100), end: Offset.zero).animate(_a),
+        child: widget.child,
       ),
-      child: widget.child,
     );
   }
 }
@@ -152,17 +124,14 @@ class _FadeSlideInState extends State<FadeSlideIn> with SingleTickerProviderStat
 class FadeScaleRoute<T> extends PageRouteBuilder<T> {
   FadeScaleRoute(Widget page)
       : super(
-          transitionDuration: const Duration(milliseconds: 420),
-          reverseTransitionDuration: const Duration(milliseconds: 300),
+          transitionDuration: const Duration(milliseconds: 360),
+          reverseTransitionDuration: const Duration(milliseconds: 260),
           pageBuilder: (_, __, ___) => page,
           transitionsBuilder: (_, anim, __, child) {
             final curved = CurvedAnimation(parent: anim, curve: Curves.easeOutCubic);
             return FadeTransition(
               opacity: curved,
-              child: Transform.scale(
-                scale: 0.98 + curved.value * 0.02,
-                child: child,
-              ),
+              child: Transform.scale(scale: 0.98 + curved.value * 0.02, child: child),
             );
           },
         );

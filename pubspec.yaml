@@ -34,3 +34,11 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icon/icon.png
+  fonts:
+    - family: Vazirmatn
+      fonts:
+        - asset: assets/fonts/Vazirmatn-Regular.ttf
+        - asset: assets/fonts/Vazirmatn-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Vazirmatn-Black.ttf
+          weight: 900
