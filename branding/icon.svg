@@ -1,43 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#5b93ff"/>
-      <stop offset="0.5" stop-color="#6d6bff"/>
-      <stop offset="1" stop-color="#9a57ff"/>
+      <stop offset="0" stop-color="#232327"/>
+      <stop offset="0.55" stop-color="#101012"/>
+      <stop offset="1" stop-color="#000000"/>
     </linearGradient>
-    <linearGradient id="shield" x1="300" y1="190" x2="724" y2="860" gradientUnits="userSpaceOnUse">
+    <radialGradient id="sphere" cx="0.4" cy="0.33" r="0.75">
       <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="1" stop-color="#dbe6ff"/>
-    </linearGradient>
-    <linearGradient id="bolt" x1="430" y1="340" x2="610" y2="700" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#6aa3ff"/>
-      <stop offset="1" stop-color="#8c5bff"/>
-    </linearGradient>
-    <radialGradient id="sheen" cx="0.3" cy="0.22" r="0.8">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/>
-      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#e9e9ee"/>
+      <stop offset="1" stop-color="#9a9aa4"/>
     </radialGradient>
-    <filter id="ds" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="18" stdDeviation="26" flood-color="#1a1046" flood-opacity="0.45"/>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="26" stdDeviation="34" flood-color="#000000" flood-opacity="0.55"/>
     </filter>
   </defs>
 
   <rect width="1024" height="1024" rx="232" fill="url(#bg)"/>
-  <rect width="1024" height="1024" rx="232" fill="url(#sheen)"/>
 
-  <!-- shield -->
-  <path d="M512 150 L792 268 V520 C792 700 672 820 512 884 C352 820 232 700 232 520 V268 Z"
-        fill="url(#shield)" filter="url(#ds)"/>
-  <path d="M512 150 L792 268 V520 C792 700 672 820 512 884 C352 820 232 700 232 520 V268 Z"
-        fill="none" stroke="#ffffff" stroke-opacity="0.6" stroke-width="4"/>
-
-  <!-- speed bolt -->
-  <path d="M556 300 L404 556 H500 L468 740 L636 470 H532 Z" fill="url(#bolt)"/>
-
-  <!-- speed streaks -->
-  <g stroke="#8c5bff" stroke-opacity="0.55" stroke-linecap="round" fill="none">
-    <path d="M300 430 H392" stroke-width="20"/>
-    <path d="M300 510 H360" stroke-width="20"/>
-    <path d="M300 590 H392" stroke-width="20"/>
+  <!-- orbit ring (tilted) -->
+  <g transform="translate(512,520) rotate(-24)">
+    <ellipse rx="332" ry="140" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="10"/>
+    <circle cx="332" cy="0" r="15" fill="#ffffff" fill-opacity="0.85"/>
   </g>
+
+  <!-- glossy sphere -->
+  <circle cx="512" cy="512" r="236" fill="url(#sphere)" filter="url(#sh)"/>
+  <!-- top specular highlight -->
+  <ellipse cx="452" cy="420" rx="110" ry="60" fill="url(#gloss)" opacity="0.6"/>
+
+  <!-- power / bolt mark -->
+  <path d="M560 356 L430 578 H512 L484 690 L612 452 H524 Z" fill="#101012"/>
 </svg>

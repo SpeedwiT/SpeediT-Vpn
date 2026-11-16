@@ -28,6 +28,7 @@ class AppState extends ChangeNotifier {
   bool onboarded = false;
   bool isPinging = false;
   Timer? _pingTimer;
+  final List<String> connectionLog = [];
 
   AppState(this.storage, this.engine);
 
@@ -58,6 +59,10 @@ class AppState extends ChangeNotifier {
 
     engine.onStatus((s) {
       status = s;
+      final t = DateTime.now();
+      final hh = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}:${t.second.toString().padLeft(2, '0')}';
+      connectionLog.add('$hh  →  ${s.name}');
+      if (connectionLog.length > 60) connectionLog.removeAt(0);
       notifyListeners();
     });
     engine.onStats((s) {

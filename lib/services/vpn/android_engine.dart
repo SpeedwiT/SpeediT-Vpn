@@ -27,7 +27,10 @@ class AndroidEngine implements VpnEngine {
         downloadSpeed: status.downloadSpeed,
       ));
     });
-    await _v2ray.initializeV2Ray();
+    await _v2ray.initializeV2Ray(
+      notificationIconResourceType: 'drawable',
+      notificationIconResourceName: 'ic_stat_speedit',
+    );
     _inited = true;
   }
 
@@ -64,7 +67,7 @@ class AndroidEngine implements VpnEngine {
       config: parser.getFullConfiguration(),
       proxyOnly: proxyOnly,
       blockedApps: blockedApps.isEmpty ? null : blockedApps,
-      bypassSubnets: null,
+      bypassSubnets: const ['0.0.0.0/0', '::/0'], // route all traffic into the tunnel
     );
   }
 
@@ -78,9 +81,9 @@ class AndroidEngine implements VpnEngine {
       return await _v2ray
           .getServerDelay(
             config: parser.getFullConfiguration(),
-            url: 'https://cp.cloudflare.com/generate_204', // fast, reachable probe
+            url: 'https://www.google.com/generate_204', // ping measured against Google
           )
-          .timeout(const Duration(seconds: 6), onTimeout: () => -1);
+          .timeout(const Duration(seconds: 8), onTimeout: () => -1);
     } catch (_) {
       return -1;
     }

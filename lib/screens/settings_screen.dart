@@ -57,7 +57,20 @@ class SettingsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             FadeSlideIn(
-              delayMs: 190,
+              delayMs: 180,
+              child: GlassCard(
+                onTap: () => _showLog(context, s, c, state),
+                child: Row(children: [
+                  Icon(Icons.article_outlined, color: c.text),
+                  const SizedBox(width: 14),
+                  Expanded(child: Text(s.t('conn_log'), style: TextStyle(color: c.text, fontWeight: FontWeight.w700))),
+                  Icon(Icons.chevron_right_rounded, color: c.textDim),
+                ]),
+              ),
+            ),
+            const SizedBox(height: 12),
+            FadeSlideIn(
+              delayMs: 210,
               child: GlassCard(
                 onTap: () => Navigator.of(context).push(FadeScaleRoute(const AboutScreen())),
                 child: Row(children: [
@@ -69,6 +82,43 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showLog(BuildContext context, S s, AppColors c, AppState state) {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(s.t('conn_log'),
+                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: c.text)),
+              const SizedBox(height: 12),
+              if (state.connectionLog.isEmpty)
+                Text(s.t('conn_log_empty'), style: TextStyle(color: c.textDim))
+              else
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 320),
+                  child: SingleChildScrollView(
+                    reverse: true,
+                    child: Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Text(
+                        state.connectionLog.join('\n'),
+                        style: TextStyle(fontFamily: 'monospace', fontSize: 13, color: c.text, height: 1.6),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

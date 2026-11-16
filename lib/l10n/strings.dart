@@ -80,6 +80,8 @@ class S {
       'auto_ping_hint': 'هر ۵ دقیقه به‌صورت خودکار پینگ همه‌ی سرورها گرفته می‌شود.',
       'pinging': 'در حال تست پینگ…',
       'copyright': '© ۱۴۰۴ Speed iT — تمام حقوق محفوظ است.',
+      'conn_log': 'گزارش اتصال',
+      'conn_log_empty': 'هنوز رویدادی ثبت نشده است.',
     },
     'en': {
       'app_name': 'SpeediT',
@@ -147,6 +149,8 @@ class S {
       'auto_ping_hint': 'Automatically pings all servers every 5 minutes.',
       'pinging': 'Pinging…',
       'copyright': '© 2025 Speed iT — All rights reserved.',
+      'conn_log': 'Connection log',
+      'conn_log_empty': 'No events yet.',
     },
   };
 }

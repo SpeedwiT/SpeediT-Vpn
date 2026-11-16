@@ -17,8 +17,29 @@ class ConnectOrb extends StatefulWidget {
 
 class _ConnectOrbState extends State<ConnectOrb> with SingleTickerProviderStateMixin {
   late final AnimationController _c =
-      AnimationController(vsync: this, duration: const Duration(seconds: 10))..repeat();
+      AnimationController(vsync: this, duration: const Duration(seconds: 10));
   double _press = 1.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(covariant ConnectOrb old) {
+    super.didUpdateWidget(old);
+    if (old.status != widget.status) _sync();
+  }
+
+  // Animate only while active; stay perfectly still (no repaints) when idle.
+  void _sync() {
+    if (widget.status == ConnStatus.disconnected) {
+      if (_c.isAnimating) _c.stop();
+    } else {
+      if (!_c.isAnimating) _c.repeat();
+    }
+  }
 
   @override
   void dispose() {

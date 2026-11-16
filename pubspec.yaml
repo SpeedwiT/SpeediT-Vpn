@@ -1,7 +1,7 @@
 name: speedit
 description: SpeediT — a fast, secure, multi-protocol VPN client for Android and Windows.
 publish_to: "none"
-version: 1.0.1+2
+version: 1.0.0+10
 
 environment:
   sdk: ">=3.3.0 <4.0.0"

@@ -1,18 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
-    <linearGradient id="shield" x1="380" y1="300" x2="644" y2="760" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dbe6ff"/>
-    </linearGradient>
-    <linearGradient id="bolt" x1="470" y1="400" x2="590" y2="660" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#6aa3ff"/><stop offset="1" stop-color="#8c5bff"/>
+    <radialGradient id="sphere" cx="0.4" cy="0.33" r="0.75">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="0.55" stop-color="#e9e9ee"/><stop offset="1" stop-color="#9a9aa4"/>
+    </radialGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient>
   </defs>
-  <!-- foreground only (transparent); mark fits the adaptive-icon safe zone (~62%) -->
-  <g transform="translate(512,512) scale(0.62) translate(-512,-512)">
-    <path d="M512 150 L792 268 V520 C792 700 672 820 512 884 C352 820 232 700 232 520 V268 Z" fill="url(#shield)"/>
-    <path d="M556 300 L404 556 H500 L468 740 L636 470 H532 Z" fill="url(#bolt)"/>
-    <g stroke="#8c5bff" stroke-opacity="0.55" stroke-linecap="round" fill="none">
-      <path d="M300 430 H392" stroke-width="20"/><path d="M300 510 H360" stroke-width="20"/><path d="M300 590 H392" stroke-width="20"/>
+  <g transform="translate(512,512) scale(0.64) translate(-512,-512)">
+    <g transform="translate(512,520) rotate(-24)">
+      <ellipse rx="332" ry="140" fill="none" stroke="#ffffff" stroke-opacity="0.3" stroke-width="12"/>
+      <circle cx="332" cy="0" r="16" fill="#ffffff"/>
     </g>
+    <circle cx="512" cy="512" r="236" fill="url(#sphere)"/>
+    <ellipse cx="452" cy="420" rx="110" ry="60" fill="url(#gloss)" opacity="0.6"/>
+    <path d="M560 356 L430 578 H512 L484 690 L612 452 H524 Z" fill="#101012"/>
   </g>
 </svg>

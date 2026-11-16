@@ -111,14 +111,21 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with: { name: android, path: dist }
       - uses: actions/download-artifact@v4
         with: { name: windows, path: dist }
+      - name: Remove previous releases (keep a single clean v1.0.0)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete v1.0.1 --repo "${{ github.repository }}" --yes --cleanup-tag || true
+          gh release delete v1.0.0 --repo "${{ github.repository }}" --yes --cleanup-tag || true
       - name: Publish release (creates the v1.0.0 tag server-side)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.1
-          name: SpeediT v1.0.1
+          tag_name: v1.0.0
+          name: SpeediT v1.0.0
           files: dist/*
           generate_release_notes: true
