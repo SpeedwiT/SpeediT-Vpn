@@ -19,10 +19,10 @@ patch_gradle() {
   # applicationId -> com.speedit.vpn
   sed -i -E 's/applicationId\s*=\s*"[^"]*"/applicationId = "com.speedit.vpn"/' "$f"
   sed -i -E 's/applicationId\s+"[^"]*"/applicationId "com.speedit.vpn"/' "$f"
-  # minSdk -> 23 (flutter_v2ray / mobile_scanner safe floor)
-  sed -i -E 's/minSdk\s*=\s*flutter\.minSdkVersion/minSdk = 23/' "$f"
-  sed -i -E 's/minSdkVersion\s+flutter\.minSdkVersion/minSdkVersion 23/' "$f"
-  sed -i -E 's/minSdk\s*=\s*[0-9]+/minSdk = 23/' "$f"
+  # minSdk -> 24 (flutter_v2ray / mobile_scanner safe floor)
+  sed -i -E 's/minSdk\s*=\s*flutter\.minSdkVersion/minSdk = 24/' "$f"
+  sed -i -E 's/minSdkVersion\s+flutter\.minSdkVersion/minSdkVersion 24/' "$f"
+  sed -i -E 's/minSdk\s*=\s*[0-9]+/minSdk = 24/' "$f"
   echo "[overlay] patched $f"
 }
 patch_gradle android/app/build.gradle.kts
