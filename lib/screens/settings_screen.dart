@@ -42,6 +42,8 @@ class SettingsScreen extends StatelessWidget {
             FadeSlideIn(
               delayMs: 140,
               child: _group(c, s.t('settings'), [
+                _switch(c, s.t('auto_ping'), state.autoPing, (v) => state.setAutoPing(v),
+                    subtitle: s.t('auto_ping_hint')),
                 _switch(c, s.t('kill_switch'), state.killSwitch, (v) => state.setKillSwitch(v)),
                 _switch(c, s.t('proxy_only'), state.proxyOnly, (v) => state.setProxyOnly(v)),
                 if (Platform.isAndroid)
@@ -93,12 +95,17 @@ class SettingsScreen extends StatelessWidget {
         title: Text(label, style: TextStyle(color: c.text, fontWeight: FontWeight.w600)),
       );
 
-  Widget _switch(AppColors c, String label, bool value, void Function(bool) onChanged) => SwitchListTile(
+  Widget _switch(AppColors c, String label, bool value, void Function(bool) onChanged,
+          {String? subtitle}) =>
+      SwitchListTile(
         value: value,
         onChanged: onChanged,
         activeColor: c.onAccent,
         activeTrackColor: c.accent,
         contentPadding: const EdgeInsets.symmetric(horizontal: 10),
         title: Text(label, style: TextStyle(color: c.text, fontWeight: FontWeight.w600)),
+        subtitle: subtitle == null
+            ? null
+            : Text(subtitle, style: TextStyle(color: c.textDim, fontSize: 12)),
       );
 }

@@ -20,7 +20,7 @@ class AppTheme {
       brightness: c.brightness,
       colorScheme: scheme,
       scaffoldBackgroundColor: c.bg,
-      fontFamily: 'Vazirmatn',
+      fontFamily: 'Estedad',
       splashFactory: InkSparkle.splashFactory,
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,

@@ -1,7 +1,7 @@
 name: speedit
 description: SpeediT — a fast, secure, multi-protocol VPN client for Android and Windows.
 publish_to: "none"
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -17,6 +17,7 @@ dependencies:
   url_launcher: ^6.3.0         # open Telegram channel
   package_info_plus: ^8.0.2    # app version in About
   provider: ^6.1.2             # state management
+  permission_handler: ^11.3.1  # runtime notification permission (keeps the VPN FGS alive)
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
@@ -35,10 +36,10 @@ flutter:
   assets:
     - assets/icon/icon.png
   fonts:
-    - family: Vazirmatn
+    - family: Estedad
       fonts:
-        - asset: assets/fonts/Vazirmatn-Regular.ttf
-        - asset: assets/fonts/Vazirmatn-Bold.ttf
+        - asset: assets/fonts/Estedad-Regular.ttf
+        - asset: assets/fonts/Estedad-Bold.ttf
           weight: 700
-        - asset: assets/fonts/Vazirmatn-Black.ttf
+        - asset: assets/fonts/Estedad-Black.ttf
           weight: 900

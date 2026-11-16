@@ -21,15 +21,20 @@ class ServersScreen extends StatelessWidget {
           title: Text(s.t('servers')),
           actions: [
             if (state.servers.isNotEmpty)
-              IconButton(
-                tooltip: s.t('ping_all'),
-                icon: const Icon(Icons.speed_rounded),
-                onPressed: () {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text(s.t('ping_all'))));
-                  state.pingAll();
-                },
-              ),
+              state.isPinging
+                  ? Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2.4, color: c.text),
+                      ),
+                    )
+                  : IconButton(
+                      tooltip: s.t('ping_all'),
+                      icon: const Icon(Icons.speed_rounded),
+                      onPressed: () => state.pingAll(),
+                    ),
             IconButton(
               tooltip: s.t('add_config'),
               icon: const Icon(Icons.add_rounded),

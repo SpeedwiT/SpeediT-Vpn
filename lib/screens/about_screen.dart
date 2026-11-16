@@ -75,6 +75,8 @@ class AboutScreen extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 24),
+            Center(child: Text(s.t('copyright'), style: TextStyle(color: c.textDim, fontSize: 12))),
           ],
         ),
       ),
@@ -84,7 +86,11 @@ class AboutScreen extends StatelessWidget {
   Widget _row(AppColors c, IconData icon, String title, String value, {VoidCallback? onTap}) => ListTile(
         onTap: onTap,
         leading: Icon(icon, color: c.text),
-        title: Text(title, style: TextStyle(color: c.text, fontWeight: FontWeight.w600)),
-        trailing: Text(value, style: TextStyle(color: c.textDim, fontWeight: FontWeight.w700)),
+        title: Text(title, style: TextStyle(color: c.text, fontWeight: FontWeight.w700)),
+        trailing: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Text(value,
+              style: TextStyle(color: c.text, fontWeight: FontWeight.w700, fontSize: 14)),
+        ),
       );
 }

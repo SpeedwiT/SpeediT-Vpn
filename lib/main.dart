@@ -11,6 +11,7 @@ import 'screens/home_screen.dart';
 import 'screens/servers_screen.dart';
 import 'screens/subscriptions_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/onboarding_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +39,7 @@ class SpeediTApp extends StatelessWidget {
         textDirection: state.lang == 'fa' ? TextDirection.rtl : TextDirection.ltr,
         child: child!,
       ),
-      home: const RootShell(),
+      home: state.onboarded ? const RootShell() : const OnboardingScreen(),
     );
   }
 }

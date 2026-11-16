@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_v2ray/flutter_v2ray.dart';
 import '../../models/proxy_server.dart';
 import 'vpn_engine.dart';
@@ -74,7 +75,12 @@ class AndroidEngine implements VpnEngine {
   Future<int> ping(ProxyServer server) async {
     try {
       final parser = FlutterV2ray.parseFromURL(server.link);
-      return await _v2ray.getServerDelay(config: parser.getFullConfiguration());
+      return await _v2ray
+          .getServerDelay(
+            config: parser.getFullConfiguration(),
+            url: 'https://cp.cloudflare.com/generate_204', // fast, reachable probe
+          )
+          .timeout(const Duration(seconds: 6), onTimeout: () => -1);
     } catch (_) {
       return -1;
     }

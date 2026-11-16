@@ -4,6 +4,7 @@ import '../l10n/strings.dart';
 import '../services/vpn/vpn_engine.dart';
 import '../state/app_state.dart';
 import '../theme/app_colors.dart';
+import '../widgets/brand_mark.dart';
 import '../widgets/connect_orb.dart';
 import '../widgets/ui_kit.dart';
 import 'about_screen.dart';
@@ -61,16 +62,7 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 16, 12, 0),
         child: Row(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                gradient: c.orbGradient,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: c.lift,
-              ),
-              child: Icon(Icons.bolt, color: c.onAccent, size: 24),
-            ),
+            const BrandMark(size: 42),
             const SizedBox(width: 10),
             Text('SpeediT',
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: c.text, letterSpacing: -0.5)),

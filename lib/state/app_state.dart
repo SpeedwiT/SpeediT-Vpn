@@ -1,4 +1,7 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../l10n/strings.dart';
 import '../models/proxy_server.dart';
 import '../models/subscription.dart';
@@ -21,6 +24,10 @@ class AppState extends ChangeNotifier {
   String lang = 'fa';
   bool proxyOnly = false;
   bool killSwitch = false;
+  bool autoPing = false;
+  bool onboarded = false;
+  bool isPinging = false;
+  Timer? _pingTimer;
 
   AppState(this.storage, this.engine);
 
@@ -44,7 +51,10 @@ class AppState extends ChangeNotifier {
     lang = st['lang'] as String? ?? 'fa';
     proxyOnly = st['proxyOnly'] as bool? ?? false;
     killSwitch = st['killSwitch'] as bool? ?? false;
+    autoPing = st['autoPing'] as bool? ?? false;
+    onboarded = st['onboarded'] as bool? ?? false;
     S.set(lang);
+    if (autoPing) _startAutoPing();
 
     engine.onStatus((s) {
       status = s;
@@ -62,6 +72,15 @@ class AppState extends ChangeNotifier {
   Future<String?> connect() async {
     final server = selected;
     if (server == null) return 'no_server';
+    // Android 13+: the VPN runs as a foreground service that needs a notification;
+    // without this permission some OEMs (e.g. MIUI) kill the service right after it starts.
+    if (Platform.isAndroid) {
+      try {
+        if (!await Permission.notification.isGranted) {
+          await Permission.notification.request();
+        }
+      } catch (_) {}
+    }
     final ok = await engine.requestPermission();
     if (!ok) return 'permission_needed';
     status = ConnStatus.connecting;
@@ -107,11 +126,45 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> pingAll() async {
+    if (isPinging || servers.isEmpty) return;
+    isPinging = true;
+    notifyListeners();
     final futures = servers.map((s) async {
       s.pingMs = await engine.ping(s);
+      notifyListeners(); // update each result as it lands (feels faster)
     });
     await Future.wait(futures);
+    isPinging = false;
     notifyListeners();
+  }
+
+  // ---- auto ping ----
+  void _startAutoPing() {
+    _pingTimer?.cancel();
+    _pingTimer = Timer.periodic(const Duration(minutes: 5), (_) => pingAll());
+  }
+
+  void _stopAutoPing() {
+    _pingTimer?.cancel();
+    _pingTimer = null;
+  }
+
+  Future<void> setAutoPing(bool v) async {
+    autoPing = v;
+    if (v) {
+      _startAutoPing();
+      pingAll();
+    } else {
+      _stopAutoPing();
+    }
+    await _persistSettings();
+  }
+
+  Future<void> completeOnboarding(String language) async {
+    lang = language;
+    onboarded = true;
+    S.set(language);
+    await _persistSettings();
   }
 
   // ---- subscriptions ----
@@ -186,6 +239,8 @@ class AppState extends ChangeNotifier {
       'lang': lang,
       'proxyOnly': proxyOnly,
       'killSwitch': killSwitch,
+      'autoPing': autoPing,
+      'onboarded': onboarded,
     });
     notifyListeners();
   }

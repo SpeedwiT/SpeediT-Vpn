@@ -73,6 +73,13 @@ class S {
       'ms': 'میلی‌ثانیه',
       'timeout': 'تایم‌اوت',
       'select': 'انتخاب',
+      'choose_language': 'زبان را انتخاب کنید',
+      'choose_language_sub': 'می‌توانید بعداً از تنظیمات تغییر دهید.',
+      'continue_btn': 'ادامه',
+      'auto_ping': 'تست پینگ خودکار',
+      'auto_ping_hint': 'هر ۵ دقیقه به‌صورت خودکار پینگ همه‌ی سرورها گرفته می‌شود.',
+      'pinging': 'در حال تست پینگ…',
+      'copyright': '© ۱۴۰۴ Speed iT — تمام حقوق محفوظ است.',
     },
     'en': {
       'app_name': 'SpeediT',
@@ -133,6 +140,13 @@ class S {
       'ms': 'ms',
       'timeout': 'timeout',
       'select': 'Select',
+      'choose_language': 'Choose your language',
+      'choose_language_sub': 'You can change it later in Settings.',
+      'continue_btn': 'Continue',
+      'auto_ping': 'Auto ping test',
+      'auto_ping_hint': 'Automatically pings all servers every 5 minutes.',
+      'pinging': 'Pinging…',
+      'copyright': '© 2025 Speed iT — All rights reserved.',
     },
   };
 }
