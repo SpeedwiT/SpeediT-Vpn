@@ -1,37 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#232327"/>
-      <stop offset="0.55" stop-color="#101012"/>
+      <stop offset="0" stop-color="#2b2b30"/>
+      <stop offset="0.5" stop-color="#111113"/>
       <stop offset="1" stop-color="#000000"/>
     </linearGradient>
-    <radialGradient id="sphere" cx="0.4" cy="0.33" r="0.75">
+    <linearGradient id="bolt" x1="360" y1="150" x2="680" y2="880" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="0.55" stop-color="#e9e9ee"/>
-      <stop offset="1" stop-color="#9a9aa4"/>
-    </radialGradient>
-    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#c6c6cf"/>
     </linearGradient>
-    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
-      <feDropShadow dx="0" dy="26" stdDeviation="34" flood-color="#000000" flood-opacity="0.55"/>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="0" stdDeviation="30" flood-color="#ffffff" flood-opacity="0.35"/>
     </filter>
   </defs>
 
   <rect width="1024" height="1024" rx="232" fill="url(#bg)"/>
 
-  <!-- orbit ring (tilted) -->
-  <g transform="translate(512,520) rotate(-24)">
-    <ellipse rx="332" ry="140" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="10"/>
-    <circle cx="332" cy="0" r="15" fill="#ffffff" fill-opacity="0.85"/>
+  <!-- speed motion lines -->
+  <g stroke="#ffffff" stroke-opacity="0.16" stroke-linecap="round" fill="none">
+    <path d="M150 470 H360" stroke-width="26"/>
+    <path d="M150 560 H300" stroke-width="26"/>
+    <path d="M150 650 H360" stroke-width="26"/>
   </g>
 
-  <!-- glossy sphere -->
-  <circle cx="512" cy="512" r="236" fill="url(#sphere)" filter="url(#sh)"/>
-  <!-- top specular highlight -->
-  <ellipse cx="452" cy="420" rx="110" ry="60" fill="url(#gloss)" opacity="0.6"/>
-
-  <!-- power / bolt mark -->
-  <path d="M560 356 L430 578 H512 L484 690 L612 452 H524 Z" fill="#101012"/>
+  <!-- bold lightning "S/speed" monogram -->
+  <path d="M612 150 L372 548 H506 L452 874 L724 452 H566 Z"
+        fill="url(#bolt)" filter="url(#glow)"/>
+  <path d="M612 150 L372 548 H506 L452 874 L724 452 H566 Z"
+        fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="3"/>
 </svg>
