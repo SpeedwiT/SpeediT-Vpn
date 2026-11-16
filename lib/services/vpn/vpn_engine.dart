@@ -23,7 +23,8 @@ abstract class VpnEngine {
   /// Ask the OS for VPN permission (Android). Returns true if granted.
   Future<bool> requestPermission();
 
-  Future<void> connect(ProxyServer server, {bool proxyOnly = false, List<String> blockedApps = const []});
+  Future<void> connect(ProxyServer server,
+      {bool proxyOnly = false, List<String> blockedApps = const [], int socksPort = 1080});
   Future<void> disconnect();
 
   /// Measure latency to a server, in ms. Returns -1 on failure/timeout.

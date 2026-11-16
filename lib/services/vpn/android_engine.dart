@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter_v2ray/flutter_v2ray.dart';
 import '../../models/proxy_server.dart';
 import 'vpn_engine.dart';
@@ -60,15 +61,35 @@ class AndroidEngine implements VpnEngine {
 
   @override
   Future<void> connect(ProxyServer server,
-      {bool proxyOnly = false, List<String> blockedApps = const []}) async {
+      {bool proxyOnly = false, List<String> blockedApps = const [], int socksPort = 1080}) async {
     final parser = FlutterV2ray.parseFromURL(server.link);
     await _v2ray.startV2Ray(
       remark: parser.remark.isNotEmpty ? parser.remark : server.remark,
-      config: parser.getFullConfiguration(),
+      config: _withSocksPort(parser.getFullConfiguration(), socksPort),
       proxyOnly: proxyOnly,
       blockedApps: blockedApps.isEmpty ? null : blockedApps,
       bypassSubnets: const ['0.0.0.0/0', '::/0'], // route all traffic into the tunnel
     );
+  }
+
+  /// Rewrite the local SOCKS inbound port in the generated Xray config so the
+  /// user-chosen proxy port takes effect (used by apps like Telegram).
+  String _withSocksPort(String config, int port) {
+    if (port == 1080) return config;
+    try {
+      final map = jsonDecode(config) as Map<String, dynamic>;
+      final inbounds = map['inbounds'];
+      if (inbounds is List) {
+        for (final ib in inbounds) {
+          if (ib is Map && (ib['protocol'] == 'socks' || ib['protocol'] == 'http')) {
+            ib['port'] = port;
+          }
+        }
+      }
+      return jsonEncode(map);
+    } catch (_) {
+      return config;
+    }
   }
 
   @override

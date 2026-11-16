@@ -44,7 +44,7 @@ class DesktopEngine implements VpnEngine {
 
   @override
   Future<void> connect(ProxyServer server,
-      {bool proxyOnly = false, List<String> blockedApps = const []}) async {
+      {bool proxyOnly = false, List<String> blockedApps = const [], int socksPort = 1080}) async {
     _statusCb?.call(ConnStatus.connecting);
     final cfg = SingboxConfig.build(server.link);
     final dir = await Directory.systemTemp.createTemp('speedit_');

@@ -26,6 +26,7 @@ class AppState extends ChangeNotifier {
   bool killSwitch = false;
   bool autoPing = false;
   bool onboarded = false;
+  int localProxyPort = 1080;
   bool isPinging = false;
   Timer? _pingTimer;
   final List<String> connectionLog = [];
@@ -54,6 +55,7 @@ class AppState extends ChangeNotifier {
     killSwitch = st['killSwitch'] as bool? ?? false;
     autoPing = st['autoPing'] as bool? ?? false;
     onboarded = st['onboarded'] as bool? ?? false;
+    localProxyPort = (st['localProxyPort'] as num?)?.toInt() ?? 1080;
     S.set(lang);
     if (autoPing) _startAutoPing();
 
@@ -90,7 +92,7 @@ class AppState extends ChangeNotifier {
     if (!ok) return 'permission_needed';
     status = ConnStatus.connecting;
     notifyListeners();
-    await engine.connect(server, proxyOnly: proxyOnly);
+    await engine.connect(server, proxyOnly: proxyOnly, socksPort: localProxyPort);
     return null;
   }
 
@@ -223,6 +225,11 @@ class AppState extends ChangeNotifier {
     await _persistSettings();
   }
 
+  Future<void> setLocalProxyPort(int port) async {
+    localProxyPort = port;
+    await _persistSettings();
+  }
+
   Future<void> setProxyOnly(bool v) async {
     proxyOnly = v;
     await _persistSettings();
@@ -246,6 +253,7 @@ class AppState extends ChangeNotifier {
       'killSwitch': killSwitch,
       'autoPing': autoPing,
       'onboarded': onboarded,
+      'localProxyPort': localProxyPort,
     });
     notifyListeners();
   }

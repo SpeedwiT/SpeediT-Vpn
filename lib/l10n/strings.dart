@@ -82,6 +82,12 @@ class S {
       'copyright': '© ۱۴۰۴ Speed iT — تمام حقوق محفوظ است.',
       'conn_log': 'گزارش اتصال',
       'conn_log_empty': 'هنوز رویدادی ثبت نشده است.',
+      'local_proxy': 'پروکسی محلی (SOCKS5)',
+      'proxy_addr': 'آدرس',
+      'proxy_port': 'پورت',
+      'proxy_hint': 'در حالت «فقط پروکسی»، اپ‌هایی مثل تلگرام را روی 127.0.0.1 و این پورت تنظیم کن (SOCKS5، بدون یوزر/پسورد).',
+      'copied': 'کپی شد',
+      'invalid_port': 'پورت باید بین ۱۰۲۴ تا ۶۵۵۳۵ باشد',
     },
     'en': {
       'app_name': 'SpeediT',
@@ -151,6 +157,12 @@ class S {
       'copyright': '© 2025 Speed iT — All rights reserved.',
       'conn_log': 'Connection log',
       'conn_log_empty': 'No events yet.',
+      'local_proxy': 'Local proxy (SOCKS5)',
+      'proxy_addr': 'Address',
+      'proxy_port': 'Port',
+      'proxy_hint': 'In “proxy only” mode, point apps like Telegram at 127.0.0.1 and this port (SOCKS5, no auth).',
+      'copied': 'Copied',
+      'invalid_port': 'Port must be between 1024 and 65535',
     },
   };
 }

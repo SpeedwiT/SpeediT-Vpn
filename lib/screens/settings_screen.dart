@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../l10n/strings.dart';
 import '../state/app_state.dart';
@@ -57,6 +58,45 @@ class SettingsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             FadeSlideIn(
+              delayMs: 160,
+              child: _group(c, s.t('local_proxy'), [
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                  leading: Icon(Icons.lan_rounded, color: c.text),
+                  title: Text(s.t('proxy_addr'), style: TextStyle(color: c.text, fontWeight: FontWeight.w600)),
+                  trailing: const Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Text('127.0.0.1', style: TextStyle(fontWeight: FontWeight.w700)),
+                  ),
+                  onTap: () {
+                    Clipboard.setData(const ClipboardData(text: '127.0.0.1'));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(s.t('copied'))));
+                  },
+                ),
+                Divider(height: 1, color: c.line),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                  leading: Icon(Icons.settings_ethernet_rounded, color: c.text),
+                  title: Text(s.t('proxy_port'), style: TextStyle(color: c.text, fontWeight: FontWeight.w600)),
+                  trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Text('${state.localProxyPort}',
+                          style: TextStyle(fontWeight: FontWeight.w800, color: c.text)),
+                    ),
+                    const SizedBox(width: 6),
+                    Icon(Icons.edit_rounded, size: 18, color: c.textDim),
+                  ]),
+                  onTap: () => _editPort(context, s, c, state),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 2, 12, 12),
+                  child: Text(s.t('proxy_hint'), style: TextStyle(color: c.textDim, fontSize: 12, height: 1.6)),
+                ),
+              ]),
+            ),
+            const SizedBox(height: 16),
+            FadeSlideIn(
               delayMs: 180,
               child: GlassCard(
                 onTap: () => _showLog(context, s, c, state),
@@ -83,6 +123,37 @@ class SettingsScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _editPort(BuildContext context, S s, AppColors c, AppState state) {
+    final ctrl = TextEditingController(text: '${state.localProxyPort}');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(s.t('proxy_port')),
+        content: TextField(
+          controller: ctrl,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          decoration: InputDecoration(labelText: s.t('proxy_port'), hintText: '1080'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(s.t('cancel'))),
+          FilledButton(
+            onPressed: () {
+              final p = int.tryParse(ctrl.text.trim()) ?? 0;
+              if (p < 1024 || p > 65535) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(s.t('invalid_port'))));
+                return;
+              }
+              Navigator.pop(ctx);
+              state.setLocalProxyPort(p);
+            },
+            child: Text(s.t('save')),
+          ),
+        ],
       ),
     );
   }
