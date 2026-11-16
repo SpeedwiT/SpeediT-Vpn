@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="shield" x1="380" y1="300" x2="644" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dbe6ff"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="470" y1="400" x2="590" y2="660" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6aa3ff"/><stop offset="1" stop-color="#8c5bff"/>
+    </linearGradient>
+  </defs>
+  <!-- foreground only (transparent); mark fits the adaptive-icon safe zone (~62%) -->
+  <g transform="translate(512,512) scale(0.62) translate(-512,-512)">
+    <path d="M512 150 L792 268 V520 C792 700 672 820 512 884 C352 820 232 700 232 520 V268 Z" fill="url(#shield)"/>
+    <path d="M556 300 L404 556 H500 L468 740 L636 470 H532 Z" fill="url(#bolt)"/>
+    <g stroke="#8c5bff" stroke-opacity="0.55" stroke-linecap="round" fill="none">
+      <path d="M300 430 H392" stroke-width="20"/><path d="M300 510 H360" stroke-width="20"/><path d="M300 590 H392" stroke-width="20"/>
+    </g>
+  </g>
+</svg>

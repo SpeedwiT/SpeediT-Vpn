@@ -1,0 +1,122 @@
+name: Build SpeediT
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: "3.29.0"
+  SINGBOX_VERSION: "1.9.3"
+
+jobs:
+  # ------------------------------------------------------------------ Android
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Scaffold android platform + apply SpeediT overlay
+        run: |
+          cp pubspec.yaml /tmp/pubspec.yaml
+          flutter create . --org com.speedit --project-name speedit --platforms=android
+          cp /tmp/pubspec.yaml pubspec.yaml
+          bash tool/apply_overlay.sh
+
+      - name: Dependencies + launcher icons
+        run: |
+          flutter pub get
+          dart run flutter_launcher_icons
+
+      - name: Build APKs (release, debug-signed for sideloading)
+        run: flutter build apk --release --split-per-abi
+
+      - name: Rename artifacts
+        run: |
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk   dist/SpeediT-android-arm64-v8a.apk
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk dist/SpeediT-android-armeabi-v7a.apk || true
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk      dist/SpeediT-android-x86_64.apk || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: dist/*.apk
+
+  # ------------------------------------------------------------------ Windows
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Scaffold windows platform + apply overlay
+        shell: bash
+        run: |
+          cp pubspec.yaml /tmp/pubspec.yaml
+          flutter config --enable-windows-desktop
+          flutter create . --org com.speedit --project-name speedit --platforms=windows
+          cp /tmp/pubspec.yaml pubspec.yaml
+
+      - name: Dependencies
+        run: flutter pub get
+
+      - name: Build Windows (release)
+        run: flutter build windows --release
+
+      - name: Bundle sing-box core
+        shell: pwsh
+        run: |
+          $ver = "${{ env.SINGBOX_VERSION }}"
+          $url = "https://github.com/SagerNet/sing-box/releases/download/v$ver/sing-box-$ver-windows-amd64.zip"
+          Invoke-WebRequest -Uri $url -OutFile singbox.zip
+          Expand-Archive singbox.zip -DestinationPath singbox
+          $rel = "build/windows/x64/runner/Release"
+          New-Item -ItemType Directory -Force -Path "$rel/core" | Out-Null
+          Copy-Item "singbox/sing-box-$ver-windows-amd64/sing-box.exe" "$rel/core/sing-box.exe"
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $rel = "build/windows/x64/runner/Release"
+          Compress-Archive -Path "$rel/*" -DestinationPath "SpeediT-windows-x64.zip" -Force
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: SpeediT-windows-x64.zip
+
+  # ------------------------------------------------------------------ Release
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [android, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: android, path: dist }
+      - uses: actions/download-artifact@v4
+        with: { name: windows, path: dist }
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

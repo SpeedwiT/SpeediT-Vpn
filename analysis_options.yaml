@@ -1,0 +1,9 @@
+include: package:flutter_lints/flutter.yaml
+linter:
+  rules:
+    avoid_print: false
+    prefer_const_constructors: false
+analyzer:
+  errors:
+    # keep CI building even if lints fire (lints stay warnings, not errors)
+    invalid_annotation_target: ignore
