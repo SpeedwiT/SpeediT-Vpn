@@ -1,70 +1,93 @@
 import 'package:flutter/material.dart';
+import 'app_colors.dart';
 
-/// SpeediT brand theme — deep indigo + blue→violet accents. Distinct identity.
+/// SpeediT theme — a clean black & white design system with depth and motion.
 class AppTheme {
-  static const brandBlue = Color(0xFF5B93FF);
-  static const brandViolet = Color(0xFF9A57FF);
-  static const brandCyan = Color(0xFF17C0C0);
-  static const good = Color(0xFF36C98A);
-  static const danger = Color(0xFFF0657A);
+  static ThemeData dark() => _build(const AppColors(Brightness.dark));
+  static ThemeData light() => _build(const AppColors(Brightness.light));
 
-  static const _bgDark = Color(0xFF070B1C);
-  static const _surfaceDark = Color(0xFF101737);
-  static const _bgLight = Color(0xFFF3F5FC);
-  static const _surfaceLight = Color(0xFFFFFFFF);
-
-  static const gradient = LinearGradient(
-    begin: Alignment.topRight,
-    end: Alignment.bottomLeft,
-    colors: [brandBlue, brandViolet],
-  );
-
-  static ThemeData dark() => _base(Brightness.dark, _bgDark, _surfaceDark);
-  static ThemeData light() => _base(Brightness.light, _bgLight, _surfaceLight);
-
-  static ThemeData _base(Brightness b, Color bg, Color surface) {
+  static ThemeData _build(AppColors c) {
     final scheme = ColorScheme.fromSeed(
-      seedColor: brandBlue,
-      brightness: b,
-    ).copyWith(secondary: brandViolet, surface: surface);
-    final onBg = b == Brightness.dark ? Colors.white : const Color(0xFF0C1230);
+      seedColor: c.isDark ? Colors.white : Colors.black,
+      brightness: c.brightness,
+    ).copyWith(
+      surface: c.surface,
+      primary: c.accent,
+      onPrimary: c.onAccent,
+    );
     return ThemeData(
       useMaterial3: true,
-      brightness: b,
+      brightness: c.brightness,
       colorScheme: scheme,
-      scaffoldBackgroundColor: bg,
+      scaffoldBackgroundColor: c.bg,
       fontFamily: 'Vazirmatn',
+      splashFactory: InkSparkle.splashFactory,
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        centerTitle: true,
-        foregroundColor: onBg,
-        titleTextStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: onBg),
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        foregroundColor: c.text,
+        titleTextStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: c.text, letterSpacing: -0.5),
       ),
-      cardTheme: CardTheme(
-        color: surface.withValues(alpha: b == Brightness.dark ? 0.6 : 1),
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: brandBlue.withValues(alpha: 0.16)),
-        ),
-      ),
+      textTheme: Typography.material2021(platform: TargetPlatform.android)
+          .black
+          .apply(bodyColor: c.text, displayColor: c.text),
+      iconTheme: IconThemeData(color: c.text),
+      dividerColor: c.line,
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: surface,
-        indicatorColor: brandBlue.withValues(alpha: 0.22),
+        height: 72,
+        backgroundColor: c.surface,
+        elevation: 0,
+        indicatorColor: c.accent.withValues(alpha: c.isDark ? 0.16 : 0.10),
         labelTextStyle: WidgetStateProperty.all(
-          const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+          TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: c.text),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (s) => IconThemeData(color: s.contains(WidgetState.selected) ? c.accent : c.textDim),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surface.withValues(alpha: 0.5),
+        fillColor: c.isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: brandBlue.withValues(alpha: 0.2)),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: c.line),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: c.line),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: c.accent, width: 1.4),
         ),
       ),
-      snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: c.isDark ? const Color(0xFF1E1E22) : const Color(0xFF111113),
+        contentTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      dialogTheme: DialogTheme(
+        backgroundColor: c.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: c.surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: c.accent,
+          foregroundColor: c.onAccent,
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+      ),
     );
   }
 }

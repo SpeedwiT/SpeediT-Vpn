@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import '../l10n/strings.dart';
 import '../services/vpn/vpn_engine.dart';
 import '../state/app_state.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_colors.dart';
+import '../widgets/connect_orb.dart';
+import '../widgets/ui_kit.dart';
 import 'about_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -12,93 +14,112 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
+    final c = AppColors.of(context);
     final state = context.watch<AppState>();
-    return Column(
-      children: [
-        _topBar(context, s),
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _statusText(context, s, state),
-              const SizedBox(height: 28),
-              _ConnectButton(
-                status: state.status,
-                onTap: () async {
-                  final err = await state.toggle();
-                  if (err != null && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(s.t(err))),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 36),
-              if (state.isConnected) _statsRow(context, state),
-              const SizedBox(height: 24),
-              _serverCard(context, s, state),
-            ],
+    return AnimatedBackground(
+      child: Column(
+        children: [
+          _topBar(context, c),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FadeSlideIn(delayMs: 60, child: _statusChip(context, s, c, state)),
+                const SizedBox(height: 30),
+                FadeSlideIn(
+                  delayMs: 120,
+                  offsetY: 0,
+                  child: ConnectOrb(
+                    status: state.status,
+                    onTap: () async {
+                      final err = await state.toggle();
+                      if (err != null && context.mounted) {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(content: Text(s.t(err))));
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: 34),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: state.isConnected
+                      ? _statsRow(context, c, state)
+                      : const SizedBox(height: 20),
+                ),
+                const SizedBox(height: 22),
+                FadeSlideIn(delayMs: 200, child: _serverCard(context, s, c, state)),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _topBar(BuildContext context, S s) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+  Widget _topBar(BuildContext context, AppColors c) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 12, 0),
         child: Row(
           children: [
             Container(
-              width: 38,
-              height: 38,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
-                gradient: AppTheme.gradient,
-                borderRadius: BorderRadius.circular(11),
+                gradient: c.orbGradient,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: c.lift,
               ),
-              child: const Icon(Icons.bolt, color: Colors.white, size: 24),
+              child: Icon(Icons.bolt, color: c.onAccent, size: 24),
             ),
             const SizedBox(width: 10),
-            const Text('SpeediT', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
+            Text('SpeediT',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: c.text, letterSpacing: -0.5)),
             const Spacer(),
             IconButton(
-              icon: const Icon(Icons.info_outline),
-              onPressed: () => Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => const AboutScreen())),
+              icon: Icon(Icons.info_outline_rounded, color: c.text),
+              onPressed: () => Navigator.of(context).push(FadeScaleRoute(const AboutScreen())),
             ),
           ],
         ),
       );
 
-  Widget _statusText(BuildContext context, S s, AppState state) {
-    final (label, color) = switch (state.status) {
-      ConnStatus.connected => (s.t('connected'), AppTheme.good),
-      ConnStatus.connecting => (s.t('connecting'), AppTheme.brandBlue),
-      ConnStatus.disconnected => (s.t('disconnected'), Colors.grey),
+  Widget _statusChip(BuildContext context, S s, AppColors c, AppState state) {
+    final label = switch (state.status) {
+      ConnStatus.connected => s.t('connected'),
+      ConnStatus.connecting => s.t('connecting'),
+      ConnStatus.disconnected => s.t('disconnected'),
     };
-    return Column(
-      children: [
+    final filled = state.status == ConnStatus.connected;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+      decoration: BoxDecoration(
+        color: filled ? c.accent : Colors.transparent,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: filled ? c.accent : c.line),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+          width: 8,
+          height: 8,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: color.withValues(alpha: 0.5)),
+            color: filled ? c.onAccent : c.textDim,
+            shape: BoxShape.circle,
           ),
-          child: Row(mainAxisSize: MainAxisSize.min, children: [
-            Container(width: 9, height: 9, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-            const SizedBox(width: 8),
-            Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w700)),
-          ]),
         ),
-      ],
+        const SizedBox(width: 8),
+        Text(label,
+            style: TextStyle(
+                color: filled ? c.onAccent : c.textDim, fontWeight: FontWeight.w800, letterSpacing: 0.3)),
+      ]),
     );
   }
 
-  Widget _statsRow(BuildContext context, AppState state) {
-    String fmt(int bytes) {
-      if (bytes > 1024 * 1024) return '${(bytes / 1024 / 1024).toStringAsFixed(1)} MB/s';
-      if (bytes > 1024) return '${(bytes / 1024).toStringAsFixed(0)} KB/s';
-      return '$bytes B/s';
+  Widget _statsRow(BuildContext context, AppColors c, AppState state) {
+    String fmt(int b) {
+      if (b > 1024 * 1024) return '${(b / 1024 / 1024).toStringAsFixed(1)} MB/s';
+      if (b > 1024) return '${(b / 1024).toStringAsFixed(0)} KB/s';
+      return '$b B/s';
     }
 
     final d = state.stats.duration;
@@ -108,107 +129,64 @@ class HomeScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _stat(Icons.timer_outlined, dur),
-        const SizedBox(width: 20),
-        _stat(Icons.download, fmt(state.stats.downloadSpeed)),
-        const SizedBox(width: 20),
-        _stat(Icons.upload, fmt(state.stats.uploadSpeed)),
+        _stat(c, Icons.schedule_rounded, dur),
+        _dot(c),
+        _stat(c, Icons.south_rounded, fmt(state.stats.downloadSpeed)),
+        _dot(c),
+        _stat(c, Icons.north_rounded, fmt(state.stats.uploadSpeed)),
       ],
     );
   }
 
-  Widget _stat(IconData i, String v) => Row(children: [
-        Icon(i, size: 18, color: AppTheme.brandBlue),
+  Widget _dot(AppColors c) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        child: Container(width: 4, height: 4, decoration: BoxDecoration(color: c.textDim, shape: BoxShape.circle)),
+      );
+
+  Widget _stat(AppColors c, IconData i, String v) => Row(children: [
+        Icon(i, size: 17, color: c.textDim),
         const SizedBox(width: 6),
-        Text(v, style: const TextStyle(fontWeight: FontWeight.w700)),
+        Text(v, style: TextStyle(fontWeight: FontWeight.w800, color: c.text)),
       ]);
 
-  Widget _serverCard(BuildContext context, S s, AppState state) {
+  Widget _serverCard(BuildContext context, S s, AppColors c, AppState state) {
     final sv = state.selected;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Card(
-        child: ListTile(
-          leading: const Icon(Icons.dns_outlined, color: AppTheme.brandBlue),
-          title: Text(sv?.remark ?? s.t('no_server'),
-              maxLines: 1, overflow: TextOverflow.ellipsis),
-          subtitle: sv != null ? Text('${sv.protocol} · ${sv.address}') : Text(s.t('tap_to_connect')),
-          trailing: sv?.pingMs != null && sv!.pingMs! >= 0
-              ? Text('${sv.pingMs} ${s.t('ms')}', style: const TextStyle(color: AppTheme.good))
-              : const Icon(Icons.chevron_left),
-        ),
-      ),
-    );
-  }
-}
-
-class _ConnectButton extends StatefulWidget {
-  final ConnStatus status;
-  final VoidCallback onTap;
-  const _ConnectButton({required this.status, required this.onTap});
-  @override
-  State<_ConnectButton> createState() => _ConnectButtonState();
-}
-
-class _ConnectButtonState extends State<_ConnectButton> with SingleTickerProviderStateMixin {
-  late final AnimationController _c =
-      AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat();
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final active = widget.status != ConnStatus.disconnected;
-    final color = widget.status == ConnStatus.connected
-        ? AppTheme.good
-        : (widget.status == ConnStatus.connecting ? AppTheme.brandBlue : AppTheme.brandViolet);
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: SizedBox(
-        width: 230,
-        height: 230,
-        child: AnimatedBuilder(
-          animation: _c,
-          builder: (context, _) {
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                if (active)
-                  Container(
-                    width: 180 + _c.value * 50,
-                    height: 180 + _c.value * 50,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: color.withValues(alpha: (1 - _c.value) * 0.5)),
-                    ),
-                  ),
-                Container(
-                  width: 170,
-                  height: 170,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [color.withValues(alpha: 0.9), color.withValues(alpha: 0.55)],
-                    ),
-                    boxShadow: [
-                      BoxShadow(color: color.withValues(alpha: 0.5), blurRadius: 40, spreadRadius: 4),
-                    ],
-                  ),
-                  child: Icon(
-                    widget.status == ConnStatus.connecting ? Icons.sync : Icons.power_settings_new,
-                    size: 72,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            );
-          },
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: c.accent.withValues(alpha: c.isDark ? 0.12 : 0.06),
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(color: c.line),
+              ),
+              child: Icon(Icons.dns_rounded, color: c.text, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(sv?.remark ?? s.t('no_server'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontWeight: FontWeight.w800, color: c.text)),
+                  const SizedBox(height: 2),
+                  Text(sv != null ? '${sv.protocol} · ${sv.address}' : s.t('tap_to_connect'),
+                      maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: c.textDim, fontSize: 12.5)),
+                ],
+              ),
+            ),
+            if (sv?.pingMs != null && sv!.pingMs! >= 0)
+              Text('${sv.pingMs} ${s.t('ms')}',
+                  style: TextStyle(color: c.text, fontWeight: FontWeight.w800)),
+          ],
         ),
       ),
     );

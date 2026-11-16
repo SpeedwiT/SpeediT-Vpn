@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../l10n/strings.dart';
-import '../models/subscription.dart';
 import '../services/subscription_service.dart';
 import '../state/app_state.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_colors.dart';
+import '../widgets/ui_kit.dart';
 import 'qr_scan_screen.dart';
 
 class SubscriptionsScreen extends StatelessWidget {
@@ -15,63 +15,91 @@ class SubscriptionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
+    final c = AppColors.of(context);
     final state = context.watch<AppState>();
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: Text(s.t('subscriptions')),
-        actions: [
-          if (state.subs.isNotEmpty)
-            TextButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(s.t('update_all'))));
-                state.updateAll();
-              },
-              icon: const Icon(Icons.refresh, size: 18),
-              label: Text(s.t('update_all')),
-            ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddSheet(context, s, state),
-        backgroundColor: AppTheme.brandBlue,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: Text(s.t('add_sub'), style: const TextStyle(color: Colors.white)),
-      ),
-      body: state.subs.isEmpty
-          ? Center(child: Text(s.t('no_servers_hint'), textAlign: TextAlign.center))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: state.subs.length,
-              itemBuilder: (context, i) {
-                final sub = state.subs[i];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: ListTile(
-                    leading: const Icon(Icons.cloud_outlined, color: AppTheme.brandBlue),
-                    title: Text(sub.name),
-                    subtitle: Text(sub.updatedAt == null
-                        ? s.t('never_updated')
-                        : s.t('servers_count').replaceAll('{n}', '${sub.serverCount}')),
-                    trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                      IconButton(
-                        icon: const Icon(Icons.refresh),
-                        onPressed: () => state.updateSub(sub),
+    return AnimatedBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: Text(s.t('subscriptions')),
+          actions: [
+            if (state.subs.isNotEmpty)
+              TextButton.icon(
+                style: TextButton.styleFrom(foregroundColor: c.text),
+                onPressed: () {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(s.t('update_all'))));
+                  state.updateAll();
+                },
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: Text(s.t('update_all')),
+              ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => _showAddSheet(context, s, c, state),
+          backgroundColor: c.accent,
+          foregroundColor: c.onAccent,
+          icon: const Icon(Icons.add_rounded),
+          label: Text(s.t('add_sub'), style: const TextStyle(fontWeight: FontWeight.w800)),
+        ),
+        body: state.subs.isEmpty
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Text(s.t('no_servers_hint'),
+                      textAlign: TextAlign.center, style: TextStyle(color: c.textDim)),
+                ),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                itemCount: state.subs.length,
+                itemBuilder: (context, i) {
+                  final sub = state.subs[i];
+                  return FadeSlideIn(
+                    delayMs: 40 * (i.clamp(0, 10)),
+                    child: GlassCard(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          Icon(Icons.cloud_rounded, color: c.text),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(sub.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontWeight: FontWeight.w800, color: c.text)),
+                                const SizedBox(height: 2),
+                                Text(
+                                    sub.updatedAt == null
+                                        ? s.t('never_updated')
+                                        : s.t('servers_count').replaceAll('{n}', '${sub.serverCount}'),
+                                    style: TextStyle(color: c.textDim, fontSize: 12.5)),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.refresh_rounded, color: c.text),
+                            onPressed: () => state.updateSub(sub),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.close_rounded, color: c.textDim),
+                            onPressed: () => state.deleteSub(sub),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () => state.deleteSub(sub),
-                      ),
-                    ]),
-                  ),
-                );
-              },
-            ),
+                    ),
+                  );
+                },
+              ),
+      ),
     );
   }
 
-  void _showAddSheet(BuildContext context, S s, AppState state) {
+  void _showAddSheet(BuildContext context, S s, AppColors c, AppState state) {
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -79,46 +107,31 @@ class SubscriptionsScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              leading: const Icon(Icons.link, color: AppTheme.brandBlue),
-              title: Text(s.t('add_sub')),
-              onTap: () {
-                Navigator.pop(ctx);
-                _addSubDialog(context, s, state);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.vpn_key_outlined, color: AppTheme.brandBlue),
-              title: Text(s.t('add_config')),
-              onTap: () {
-                Navigator.pop(ctx);
-                _addConfigDialog(context, s, state);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.content_paste, color: AppTheme.brandBlue),
-              title: Text(s.t('import_clipboard')),
-              onTap: () async {
-                Navigator.pop(ctx);
-                await _importClipboard(context, s, state);
-              },
-            ),
+            _opt(ctx, Icons.link_rounded, s.t('add_sub'), () => _addSubDialog(context, s, state)),
+            _opt(ctx, Icons.vpn_key_rounded, s.t('add_config'), () => _addConfigDialog(context, s, state)),
+            _opt(ctx, Icons.content_paste_rounded, s.t('import_clipboard'),
+                () => _importClipboard(context, s, state)),
             if (Platform.isAndroid || Platform.isIOS)
-              ListTile(
-                leading: const Icon(Icons.qr_code_scanner, color: AppTheme.brandBlue),
-                title: Text(s.t('scan_qr')),
-                onTap: () async {
-                  Navigator.pop(ctx);
-                  final code = await Navigator.of(context)
-                      .push<String>(MaterialPageRoute(builder: (_) => const QrScanScreen()));
-                  if (code != null) await _handleImported(context, s, state, code);
-                },
-              ),
+              _opt(ctx, Icons.qr_code_scanner_rounded, s.t('scan_qr'), () async {
+                final code = await Navigator.of(context)
+                    .push<String>(MaterialPageRoute(builder: (_) => const QrScanScreen()));
+                if (code != null && context.mounted) await _handleImported(context, s, state, code);
+              }),
+            const SizedBox(height: 10),
           ],
         ),
       ),
     );
   }
+
+  Widget _opt(BuildContext ctx, IconData icon, String title, VoidCallback onTap) => ListTile(
+        leading: Icon(icon),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+        onTap: () {
+          Navigator.pop(ctx);
+          onTap();
+        },
+      );
 
   void _addSubDialog(BuildContext context, S s, AppState state) {
     final name = TextEditingController();
@@ -129,7 +142,7 @@ class SubscriptionsScreen extends StatelessWidget {
         title: Text(s.t('add_sub')),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           TextField(controller: name, decoration: InputDecoration(labelText: s.t('sub_name'))),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           TextField(controller: url, decoration: InputDecoration(labelText: s.t('sub_url'))),
         ]),
         actions: [
@@ -141,8 +154,7 @@ class SubscriptionsScreen extends StatelessWidget {
               await state.addSub(
                   name.text.trim().isEmpty ? 'Subscription' : name.text.trim(), url.text.trim());
               if (context.mounted) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(s.t('updated'))));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(s.t('updated'))));
               }
             },
             child: Text(s.t('save')),
@@ -186,10 +198,9 @@ class SubscriptionsScreen extends StatelessWidget {
       }
       return;
     }
-    await _handleImported(context, s, state, text);
+    if (context.mounted) await _handleImported(context, s, state, text);
   }
 
-  /// Accepts a single share link or a whole subscription body (multi-line / base64).
   Future<void> _handleImported(BuildContext context, S s, AppState state, String text) async {
     final servers = SubscriptionService.parseBody(text);
     String msg;

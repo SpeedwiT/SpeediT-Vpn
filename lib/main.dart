@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'l10n/strings.dart';
 import 'services/storage.dart';
 import 'services/vpn/vpn_engine.dart';
 import 'state/app_state.dart';
+import 'theme/app_colors.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/servers_screen.dart';
@@ -49,22 +51,43 @@ class RootShell extends StatefulWidget {
 
 class _RootShellState extends State<RootShell> {
   int _index = 0;
+  static const _pages = [HomeScreen(), ServersScreen(), SubscriptionsScreen(), SettingsScreen()];
 
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    const pages = [HomeScreen(), ServersScreen(), SubscriptionsScreen(), SettingsScreen()];
-    return Scaffold(
-      body: SafeArea(child: pages[_index]),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: [
-          NavigationDestination(icon: const Icon(Icons.power_settings_new), label: s.t('tab_home')),
-          NavigationDestination(icon: const Icon(Icons.dns_outlined), label: s.t('tab_servers')),
-          NavigationDestination(icon: const Icon(Icons.cloud_download_outlined), label: s.t('tab_subs')),
-          NavigationDestination(icon: const Icon(Icons.settings_outlined), label: s.t('tab_settings')),
-        ],
+    final c = AppColors.of(context);
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: c.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        extendBody: true,
+        body: SafeArea(
+          bottom: false,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 320),
+            switchInCurve: Curves.easeOutCubic,
+            transitionBuilder: (child, anim) => FadeTransition(
+              opacity: anim,
+              child: SlideTransition(
+                position: Tween<Offset>(begin: const Offset(0, 0.02), end: Offset.zero).animate(anim),
+                child: child,
+              ),
+            ),
+            child: KeyedSubtree(key: ValueKey(_index), child: _pages[_index]),
+          ),
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _index,
+          onDestinationSelected: (i) => setState(() => _index = i),
+          destinations: [
+            NavigationDestination(
+                icon: const Icon(Icons.power_settings_new_rounded), label: s.t('tab_home')),
+            NavigationDestination(icon: const Icon(Icons.dns_rounded), label: s.t('tab_servers')),
+            NavigationDestination(
+                icon: const Icon(Icons.cloud_rounded), label: s.t('tab_subs')),
+            NavigationDestination(icon: const Icon(Icons.settings_rounded), label: s.t('tab_settings')),
+          ],
+        ),
       ),
     );
   }

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../l10n/strings.dart';
 import '../state/app_state.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_colors.dart';
+import '../widgets/ui_kit.dart';
 
 class ServersScreen extends StatelessWidget {
   const ServersScreen({super.key});
@@ -10,82 +11,112 @@ class ServersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
+    final c = AppColors.of(context);
     final state = context.watch<AppState>();
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: Text(s.t('servers')),
-        actions: [
-          TextButton.icon(
-            onPressed: state.servers.isEmpty
-                ? null
-                : () {
+    return AnimatedBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: Text(s.t('servers')),
+          actions: [
+            if (state.servers.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(right: 8, left: 8),
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(foregroundColor: c.text),
+                  onPressed: () {
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text(s.t('ping_all'))));
                     state.pingAll();
                   },
-            icon: const Icon(Icons.speed, size: 18),
-            label: Text(s.t('ping_all')),
-          ),
-        ],
-      ),
-      body: state.servers.isEmpty
-          ? _empty(context, s)
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: state.servers.length,
-              itemBuilder: (context, i) {
-                final sv = state.servers[i];
-                final selected = sv.id == state.selectedId;
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: ListTile(
-                    onTap: () => state.selectServer(sv.id),
-                    leading: Icon(
-                      selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                      color: selected ? AppTheme.brandBlue : Colors.grey,
-                    ),
-                    title: Text(sv.remark, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    subtitle: Text('${sv.protocol} · ${sv.address}:${sv.port}'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (sv.pingMs != null)
-                          Text(
-                            sv.pingMs! >= 0 ? '${sv.pingMs} ${s.t('ms')}' : s.t('timeout'),
-                            style: TextStyle(
-                              color: sv.pingMs! < 0
-                                  ? AppTheme.danger
-                                  : (sv.pingMs! < 300 ? AppTheme.good : Colors.orange),
-                              fontWeight: FontWeight.w700,
+                  icon: const Icon(Icons.speed_rounded, size: 18),
+                  label: Text(s.t('ping_all')),
+                ),
+              ),
+          ],
+        ),
+        body: state.servers.isEmpty
+            ? _empty(context, s, c)
+            : ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                itemCount: state.servers.length,
+                itemBuilder: (context, i) {
+                  final sv = state.servers[i];
+                  final selected = sv.id == state.selectedId;
+                  return FadeSlideIn(
+                    delayMs: 40 * (i.clamp(0, 10)),
+                    child: GlassCard(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      onTap: () => state.selectServer(sv.id),
+                      child: Row(
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 220),
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: selected ? c.accent : Colors.transparent,
+                              border: Border.all(color: selected ? c.accent : c.textDim, width: 2),
+                            ),
+                            child: selected
+                                ? Icon(Icons.check, size: 14, color: c.onAccent)
+                                : null,
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(sv.remark,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontWeight: FontWeight.w800, color: c.text)),
+                                const SizedBox(height: 2),
+                                Text('${sv.protocol} · ${sv.address}:${sv.port}',
+                                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(color: c.textDim, fontSize: 12.5)),
+                              ],
                             ),
                           ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline, size: 20),
-                          onPressed: () => state.deleteServer(sv.id),
-                        ),
-                      ],
+                          if (sv.pingMs != null)
+                            Text(
+                              sv.pingMs! >= 0 ? '${sv.pingMs} ${s.t('ms')}' : s.t('timeout'),
+                              style: TextStyle(
+                                color: sv.pingMs! < 0 ? c.textDim : c.text,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          IconButton(
+                            icon: Icon(Icons.close_rounded, size: 18, color: c.textDim),
+                            onPressed: () => state.deleteServer(sv.id),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
+      ),
     );
   }
 
-  Widget _empty(BuildContext context, S s) => Center(
+  Widget _empty(BuildContext context, S s, AppColors c) => Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.dns_outlined, size: 64, color: AppTheme.brandBlue),
-              const SizedBox(height: 16),
-              Text(s.t('no_servers'),
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 8),
-              Text(s.t('no_servers_hint'), textAlign: TextAlign.center),
-            ],
+          child: FadeSlideIn(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.dns_rounded, size: 60, color: c.textDim),
+                const SizedBox(height: 16),
+                Text(s.t('no_servers'),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: c.text)),
+                const SizedBox(height: 8),
+                Text(s.t('no_servers_hint'), textAlign: TextAlign.center, style: TextStyle(color: c.textDim)),
+              ],
+            ),
           ),
         ),
       );

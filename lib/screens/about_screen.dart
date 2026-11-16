@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/strings.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_colors.dart';
+import '../widgets/ui_kit.dart';
 
 const String kChannel = '@Speedw_IT';
 const String kChannelUrl = 'https://t.me/Speedw_IT';
@@ -14,68 +15,76 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    return Scaffold(
-      appBar: AppBar(title: Text(s.t('about'))),
-      body: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          const SizedBox(height: 12),
-          Center(
-            child: Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                gradient: AppTheme.gradient,
-                borderRadius: BorderRadius.circular(26),
-                boxShadow: [BoxShadow(color: AppTheme.brandBlue.withValues(alpha: 0.5), blurRadius: 30)],
-              ),
-              child: const Icon(Icons.bolt, color: Colors.white, size: 54),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Center(
-            child: Text('SpeediT', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900)),
-          ),
-          const SizedBox(height: 6),
-          Center(child: Text(s.t('about_desc'), textAlign: TextAlign.center)),
-          const SizedBox(height: 28),
-          Card(
-            child: Column(children: [
-              FutureBuilder<PackageInfo>(
-                future: PackageInfo.fromPlatform(),
-                builder: (context, snap) => ListTile(
-                  leading: const Icon(Icons.verified_outlined, color: AppTheme.brandBlue),
-                  title: Text(s.t('version')),
-                  trailing: Text(snap.hasData ? '${snap.data!.version} (${snap.data!.buildNumber})' : '…'),
+    final c = AppColors.of(context);
+    return AnimatedBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(title: Text(s.t('about'))),
+        body: ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            const SizedBox(height: 10),
+            FadeSlideIn(
+              child: Center(
+                child: Container(
+                  width: 104,
+                  height: 104,
+                  decoration: BoxDecoration(
+                    gradient: c.orbGradient,
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: c.lift,
+                  ),
+                  child: Icon(Icons.bolt, color: c.onAccent, size: 58),
                 ),
               ),
-              const Divider(height: 1),
-              ListTile(
-                leading: const Icon(Icons.person_outline, color: AppTheme.brandBlue),
-                title: Text(s.t('developer')),
-                trailing: const Text(kDeveloper),
-              ),
-              const Divider(height: 1),
-              ListTile(
-                leading: const Icon(Icons.send, color: AppTheme.brandBlue),
-                title: Text(s.t('channel')),
-                subtitle: const Text(kChannel),
-                trailing: const Icon(Icons.open_in_new, size: 18),
-                onTap: () => launchUrl(Uri.parse(kChannelUrl), mode: LaunchMode.externalApplication),
-              ),
-            ]),
-          ),
-          const SizedBox(height: 20),
-          Center(
-            child: FilledButton.icon(
-              style: FilledButton.styleFrom(backgroundColor: AppTheme.brandBlue),
-              onPressed: () => launchUrl(Uri.parse(kChannelUrl), mode: LaunchMode.externalApplication),
-              icon: const Icon(Icons.telegram),
-              label: Text(s.t('open_channel')),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Center(
+              child: Text('SpeediT',
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: c.text, letterSpacing: -1)),
+            ),
+            const SizedBox(height: 6),
+            Center(child: Text(s.t('about_desc'), textAlign: TextAlign.center, style: TextStyle(color: c.textDim))),
+            const SizedBox(height: 28),
+            FadeSlideIn(
+              delayMs: 120,
+              child: GlassCard(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                child: Column(children: [
+                  FutureBuilder<PackageInfo>(
+                    future: PackageInfo.fromPlatform(),
+                    builder: (context, snap) => _row(c, Icons.verified_rounded, s.t('version'),
+                        snap.hasData ? '${snap.data!.version} (${snap.data!.buildNumber})' : '…'),
+                  ),
+                  Divider(height: 1, color: c.line),
+                  _row(c, Icons.person_rounded, s.t('developer'), kDeveloper),
+                  Divider(height: 1, color: c.line),
+                  _row(c, Icons.send_rounded, s.t('channel'), kChannel,
+                      onTap: () => launchUrl(Uri.parse(kChannelUrl), mode: LaunchMode.externalApplication)),
+                ]),
+              ),
+            ),
+            const SizedBox(height: 22),
+            FadeSlideIn(
+              delayMs: 200,
+              child: Center(
+                child: FilledButton.icon(
+                  onPressed: () => launchUrl(Uri.parse(kChannelUrl), mode: LaunchMode.externalApplication),
+                  icon: const Icon(Icons.telegram_rounded),
+                  label: Text(s.t('open_channel')),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+
+  Widget _row(AppColors c, IconData icon, String title, String value, {VoidCallback? onTap}) => ListTile(
+        onTap: onTap,
+        leading: Icon(icon, color: c.text),
+        title: Text(title, style: TextStyle(color: c.text, fontWeight: FontWeight.w600)),
+        trailing: Text(value, style: TextStyle(color: c.textDim, fontWeight: FontWeight.w700)),
+      );
 }
