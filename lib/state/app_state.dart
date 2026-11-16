@@ -72,12 +72,13 @@ class AppState extends ChangeNotifier {
 
   Future<void> disconnect() => engine.disconnect();
 
-  Future<void> toggle() async {
+  /// Returns an error key (for S.t) when starting fails, else null.
+  Future<String?> toggle() async {
     if (isConnected || isConnecting) {
       await disconnect();
-    } else {
-      await connect();
+      return null;
     }
+    return await connect();
   }
 
   // ---- servers ----
