@@ -4,8 +4,8 @@ import 'package:flutter_v2ray/flutter_v2ray.dart';
 import '../../models/proxy_server.dart';
 import 'vpn_engine.dart';
 
-/// Android VPN core backed by the Xray engine (flutter_v2ray). Real tunnel via
-/// Android VpnService — supports VLESS / VMess / Trojan / Shadowsocks share links.
+/// Android VPN core backed by the Xray engine (flutter_v2ray). Supports full-VPN
+/// (VpnService TUN) and proxy-only mode (local SOCKS5 for apps like Telegram).
 class AndroidEngine implements VpnEngine {
   late final FlutterV2ray _v2ray;
   void Function(ConnStatus)? _statusCb;
@@ -47,13 +47,12 @@ class AndroidEngine implements VpnEngine {
   }
 
   Duration _parseDuration(String d) {
-    final parts = d.split(':');
-    if (parts.length != 3) return Duration.zero;
+    final p = d.split(':');
+    if (p.length != 3) return Duration.zero;
     return Duration(
-      hours: int.tryParse(parts[0]) ?? 0,
-      minutes: int.tryParse(parts[1]) ?? 0,
-      seconds: int.tryParse(parts[2]) ?? 0,
-    );
+        hours: int.tryParse(p[0]) ?? 0,
+        minutes: int.tryParse(p[1]) ?? 0,
+        seconds: int.tryParse(p[2]) ?? 0);
   }
 
   @override
@@ -65,31 +64,15 @@ class AndroidEngine implements VpnEngine {
     final parser = FlutterV2ray.parseFromURL(server.link);
     await _v2ray.startV2Ray(
       remark: parser.remark.isNotEmpty ? parser.remark : server.remark,
-      config: _withSocksPort(parser.getFullConfiguration(), socksPort),
+      config: _prepareConfig(parser.getFullConfiguration(), socksPort),
       proxyOnly: proxyOnly,
       blockedApps: blockedApps.isEmpty ? null : blockedApps,
-      bypassSubnets: const ['0.0.0.0/0', '::/0'], // route all traffic into the tunnel
+      // IPv4-only full-tunnel route. Deliberately NOT adding '::/0': VLESS/VMess
+      // configs rarely have an IPv6 outbound, so routing IPv6 into the TUN
+      // black-holes it and Android's connectivity monitor then revokes the VPN
+      // (the "connect → instantly drop" flapping users hit on MIUI/Xiaomi).
+      bypassSubnets: const ['0.0.0.0/0'],
     );
-  }
-
-  /// Rewrite the local SOCKS inbound port in the generated Xray config so the
-  /// user-chosen proxy port takes effect (used by apps like Telegram).
-  String _withSocksPort(String config, int port) {
-    if (port == 1080) return config;
-    try {
-      final map = jsonDecode(config) as Map<String, dynamic>;
-      final inbounds = map['inbounds'];
-      if (inbounds is List) {
-        for (final ib in inbounds) {
-          if (ib is Map && (ib['protocol'] == 'socks' || ib['protocol'] == 'http')) {
-            ib['port'] = port;
-          }
-        }
-      }
-      return jsonEncode(map);
-    } catch (_) {
-      return config;
-    }
   }
 
   @override
@@ -102,11 +85,58 @@ class AndroidEngine implements VpnEngine {
       return await _v2ray
           .getServerDelay(
             config: parser.getFullConfiguration(),
-            url: 'https://www.google.com/generate_204', // ping measured against Google
+            url: 'https://www.google.com/generate_204',
           )
           .timeout(const Duration(seconds: 8), onTimeout: () => -1);
     } catch (_) {
       return -1;
+    }
+  }
+
+  /// Normalise the generated Xray config before launch:
+  ///  • rewrite the local SOCKS/HTTP inbound port to the user-chosen value
+  ///    (so apps like Telegram can point at 127.0.0.1:<port> in proxy mode), and
+  ///  • force IPv4 resolution/egress so the core never stalls on a failing IPv6
+  ///    lookup or connection (a common "connected but no traffic" / timeout
+  ///    symptom when the server has no working IPv6).
+  String _prepareConfig(String config, int port) {
+    try {
+      final map = jsonDecode(config) as Map<String, dynamic>;
+
+      // 1) Local inbound port.
+      final inbounds = map['inbounds'];
+      if (inbounds is List) {
+        for (final ib in inbounds) {
+          if (ib is Map && (ib['protocol'] == 'socks' || ib['protocol'] == 'http')) {
+            ib['port'] = port;
+          }
+        }
+      }
+
+      // 2) Prefer IPv4 at the DNS layer.
+      final dns = map['dns'];
+      if (dns is Map) {
+        dns['queryStrategy'] = 'UseIPv4';
+      } else {
+        map['dns'] = {'queryStrategy': 'UseIPv4'};
+      }
+
+      // 3) Prefer IPv4 on the direct (freedom) outbound.
+      final outbounds = map['outbounds'];
+      if (outbounds is List) {
+        for (final ob in outbounds) {
+          if (ob is Map && ob['protocol'] == 'freedom') {
+            final settings = (ob['settings'] is Map)
+                ? ob['settings'] as Map
+                : (ob['settings'] = <String, dynamic>{});
+            settings['domainStrategy'] = 'UseIPv4';
+          }
+        }
+      }
+
+      return jsonEncode(map);
+    } catch (_) {
+      return config;
     }
   }
 }

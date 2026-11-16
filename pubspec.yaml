@@ -1,7 +1,7 @@
 name: speedit
 description: SpeediT — a fast, secure, multi-protocol VPN client for Android and Windows.
 publish_to: "none"
-version: 1.0.0+14
+version: 1.0.0+15
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -10,8 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_v2ray: 2.0.0         # Android core (Xray). 2.0.0's core connects + measures
-                               # delay; 1.0.10's bundled core is too old for modern configs.
+  flutter_v2ray: 2.0.0         # Xray core — full-VPN (TUN) + proxy-only mode + ping.
   shared_preferences: ^2.2.3   # local persistence (servers, subs, settings)
   http: ^1.2.1                 # fetch subscription contents
   mobile_scanner: ^5.2.3       # QR import
