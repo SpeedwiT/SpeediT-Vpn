@@ -35,6 +35,11 @@ jobs:
           cp /tmp/pubspec.yaml pubspec.yaml
           bash tool/apply_overlay.sh
 
+      - name: Use the fixed debug key (stable signature across all builds)
+        run: |
+          mkdir -p "$HOME/.android"
+          cp tool/debug.keystore "$HOME/.android/debug.keystore"
+
       - name: Dependencies + launcher icons
         run: |
           flutter pub get

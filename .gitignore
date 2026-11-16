@@ -28,3 +28,6 @@ pubspec.lock
 *.jks
 *.keystore
 key.properties
+
+# committed fixed debug key so every CI build shares one signature
+!tool/debug.keystore
