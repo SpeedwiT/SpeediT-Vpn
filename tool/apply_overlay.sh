@@ -33,6 +33,32 @@ patch_gradle() {
   sed -i -E 's/targetSdk\s*=\s*flutter\.targetSdkVersion/targetSdk = 33/' "$f"
   sed -i -E 's/targetSdkVersion\s+flutter\.targetSdkVersion/targetSdkVersion 33/' "$f"
   sed -i -E 's/targetSdk\s*=\s*[0-9]+/targetSdk = 33/' "$f"
+  # useLegacyPackaging = true: flutter_v2ray 2.0.0 bundles a tun2socks native
+  # executable that must be extracted to the filesystem (not kept compressed inside
+  # the APK) so the VPN service can launch it with ProcessBuilder. Without this,
+  # full VPN (TUN) mode silently fails while proxy-only mode still works because
+  # proxy mode never starts tun2socks.
+  # Only inject once — idempotent on re-runs.
+  if ! grep -q 'useLegacyPackaging' "$f"; then
+    # Insert a packaging block before `buildTypes {` (always inside android { }
+    # in Flutter-generated Gradle files). python3 is portable across macOS+Linux.
+    python3 - "$f" << 'PYEOF'
+import sys
+path = sys.argv[1]
+content = open(path).read()
+marker = 'buildTypes {'
+if marker in content:
+    snippet = (
+        '    packaging {\n'
+        '        jniLibs { useLegacyPackaging = true }\n'
+        '    }\n'
+        '    '
+    )
+    content = content.replace(marker, snippet + marker, 1)
+    open(path, 'w').write(content)
+PYEOF
+    echo "[overlay] added useLegacyPackaging to $f"
+  fi
   echo "[overlay] patched $f"
 }
 patch_gradle android/app/build.gradle.kts
