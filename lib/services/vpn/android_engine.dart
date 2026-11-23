@@ -67,11 +67,12 @@ class AndroidEngine implements VpnEngine {
       config: _prepareConfig(parser.getFullConfiguration(), socksPort),
       proxyOnly: proxyOnly,
       blockedApps: blockedApps.isEmpty ? null : blockedApps,
-      // IPv4-only full-tunnel route. Deliberately NOT adding '::/0': VLESS/VMess
-      // configs rarely have an IPv6 outbound, so routing IPv6 into the TUN
-      // black-holes it and Android's connectivity monitor then revokes the VPN
-      // (the "connect → instantly drop" flapping users hit on MIUI/Xiaomi).
-      bypassSubnets: const ['0.0.0.0/0'],
+      // bypassSubnets = subnets that go DIRECT (bypass the VPN tunnel).
+      // Passing null routes all traffic through the TUN interface (full tunnel).
+      // IPv6 flapping is handled at the Xray layer: _prepareConfig forces
+      // UseIPv4 for DNS and the freedom outbound, so the core never attempts
+      // an IPv6 connection regardless of what the TUN routes.
+      bypassSubnets: null,
     );
   }
 

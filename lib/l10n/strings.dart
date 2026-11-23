@@ -88,6 +88,7 @@ class S {
       'proxy_hint': 'در حالت «فقط پروکسی»، اپ‌هایی مثل تلگرام را روی 127.0.0.1 و این پورت تنظیم کن (SOCKS5، بدون یوزر/پسورد).',
       'copied': 'کپی شد',
       'invalid_port': 'پورت باید بین ۱۰۲۴ تا ۶۵۵۳۵ باشد',
+      'connection_failed': 'خطا در شروع اتصال. لطفاً دوباره امتحان کنید.',
     },
     'en': {
       'app_name': 'SpeediT',
@@ -163,6 +164,7 @@ class S {
       'proxy_hint': 'In “proxy only” mode, point apps like Telegram at 127.0.0.1 and this port (SOCKS5, no auth).',
       'copied': 'Copied',
       'invalid_port': 'Port must be between 1024 and 65535',
+      'connection_failed': 'Failed to start the connection. Please try again.',
     },
   };
 }

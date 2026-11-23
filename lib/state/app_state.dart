@@ -92,7 +92,15 @@ class AppState extends ChangeNotifier {
     if (!ok) return 'permission_needed';
     status = ConnStatus.connecting;
     notifyListeners();
-    await engine.connect(server, proxyOnly: proxyOnly, socksPort: localProxyPort);
+    try {
+      await engine.connect(server, proxyOnly: proxyOnly, socksPort: localProxyPort);
+    } catch (_) {
+      // If the core throws while starting, never leave the UI stuck on
+      // "connecting" — reset to disconnected so the user can retry.
+      status = ConnStatus.disconnected;
+      notifyListeners();
+      return 'connection_failed';
+    }
     return null;
   }
 
