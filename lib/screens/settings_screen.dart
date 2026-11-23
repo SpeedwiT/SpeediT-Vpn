@@ -7,6 +7,7 @@ import '../state/app_state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/ui_kit.dart';
 import 'about_screen.dart';
+import 'per_app_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -52,7 +53,15 @@ class SettingsScreen extends StatelessWidget {
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.apps_rounded, color: c.text),
                     title: Text(s.t('per_app'), style: TextStyle(color: c.text, fontWeight: FontWeight.w600)),
-                    subtitle: Text(s.t('per_app_hint'), style: TextStyle(color: c.textDim)),
+                    subtitle: Text(
+                      state.blockedApps.isEmpty
+                          ? s.t('per_app_hint')
+                          : s.t('per_app_selected').replaceAll('{n}', '${state.blockedApps.length}'),
+                      style: TextStyle(color: c.textDim),
+                    ),
+                    trailing: Icon(Icons.chevron_right_rounded, color: c.textDim),
+                    onTap: () => Navigator.of(context)
+                        .push(FadeScaleRoute(const PerAppScreen())),
                   ),
               ]),
             ),

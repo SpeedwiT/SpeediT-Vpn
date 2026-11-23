@@ -49,6 +49,46 @@ class SingboxConfig {
     };
   }
 
+  /// Build a proxy-only config: a local SOCKS5 inbound (no TUN), so apps can
+  /// point at 127.0.0.1:[socksPort] explicitly. Used on desktop when the user
+  /// enables "Proxy only" (avoids needing admin elevation for a TUN device).
+  static Map<String, dynamic> buildProxyOnly(String link, {int socksPort = 1080}) {
+    final proxy = outbound(link);
+    return {
+      'log': {'level': 'warn'},
+      'dns': {
+        'servers': [
+          {'tag': 'remote', 'address': 'tls://1.1.1.1', 'detour': 'proxy'},
+          {'tag': 'local', 'address': '223.5.5.5', 'detour': 'direct'},
+        ],
+        'final': 'remote',
+        'strategy': 'prefer_ipv4',
+      },
+      'inbounds': [
+        {
+          'type': 'socks',
+          'tag': 'socks-in',
+          'listen': '127.0.0.1',
+          'listen_port': socksPort,
+          'sniff': true,
+        }
+      ],
+      'outbounds': [
+        proxy,
+        {'type': 'direct', 'tag': 'direct'},
+        {'type': 'dns', 'tag': 'dns-out'},
+      ],
+      'route': {
+        'rules': [
+          {'protocol': 'dns', 'outbound': 'dns-out'},
+          {'ip_is_private': true, 'outbound': 'direct'},
+        ],
+        'final': 'proxy',
+        'auto_detect_interface': true,
+      },
+    };
+  }
+
   /// Build only the proxy outbound (tag "proxy") for [link].
   static Map<String, dynamic> outbound(String link) {
     link = link.trim();

@@ -46,7 +46,13 @@ class DesktopEngine implements VpnEngine {
   Future<void> connect(ProxyServer server,
       {bool proxyOnly = false, List<String> blockedApps = const [], int socksPort = 1080}) async {
     _statusCb?.call(ConnStatus.connecting);
-    final cfg = SingboxConfig.build(server.link);
+    final Map<String, dynamic> cfg;
+    if (proxyOnly) {
+      // Proxy-only mode: expose a local SOCKS5 inbound at socksPort, no TUN.
+      cfg = SingboxConfig.buildProxyOnly(server.link, socksPort: socksPort);
+    } else {
+      cfg = SingboxConfig.build(server.link);
+    }
     final dir = await Directory.systemTemp.createTemp('speedit_');
     final cfgFile = File('${dir.path}${Platform.pathSeparator}config.json');
     await cfgFile.writeAsString(const JsonEncoder.withIndent('  ').convert(cfg));
@@ -68,6 +74,8 @@ class DesktopEngine implements VpnEngine {
   Future<void> disconnect() async {
     _ticker?.cancel();
     _proc?.kill();
+    // Give the process up to 3 s to exit cleanly before we move on.
+    await _proc?.exitCode.timeout(const Duration(seconds: 3), onTimeout: () => -1);
     _proc = null;
     _statusCb?.call(ConnStatus.disconnected);
   }

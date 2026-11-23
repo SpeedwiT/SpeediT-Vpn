@@ -9,6 +9,7 @@ class Storage {
   static const _kSubs = 'subscriptions';
   static const _kSelected = 'selected_server';
   static const _kSettings = 'settings';
+  static const _kBlockedApps = 'blocked_apps';
 
   final SharedPreferences _p;
   Storage(this._p);
@@ -46,4 +47,14 @@ class Storage {
   }
 
   Future<void> saveSettings(Map<String, dynamic> s) => _p.setString(_kSettings, jsonEncode(s));
+
+  List<String> loadBlockedApps() {
+    final raw = _p.getString(_kBlockedApps);
+    if (raw == null) return [];
+    final list = jsonDecode(raw) as List;
+    return list.map((e) => e.toString()).toList();
+  }
+
+  Future<void> saveBlockedApps(List<String> apps) =>
+      _p.setString(_kBlockedApps, jsonEncode(apps));
 }

@@ -27,9 +27,16 @@ class AppState extends ChangeNotifier {
   bool autoPing = false;
   bool onboarded = false;
   int localProxyPort = 1080;
+  List<String> blockedApps = [];
   bool isPinging = false;
   Timer? _pingTimer;
   final List<String> connectionLog = [];
+
+  /// True when disconnect() was called explicitly by the user.
+  /// Used to distinguish intentional disconnects from unexpected VPN drops.
+  bool _userDisconnected = false;
+  /// Guards against overlapping auto-reconnect attempts.
+  bool _reconnecting = false;
 
   AppState(this.storage, this.engine);
 
@@ -56,16 +63,32 @@ class AppState extends ChangeNotifier {
     autoPing = st['autoPing'] as bool? ?? false;
     onboarded = st['onboarded'] as bool? ?? false;
     localProxyPort = (st['localProxyPort'] as num?)?.toInt() ?? 1080;
+    blockedApps = storage.loadBlockedApps();
     S.set(lang);
     if (autoPing) _startAutoPing();
 
     engine.onStatus((s) {
+      final prev = status;
       status = s;
       final t = DateTime.now();
       final hh = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}:${t.second.toString().padLeft(2, '0')}';
       connectionLog.add('$hh  →  ${s.name}');
       if (connectionLog.length > 60) connectionLog.removeAt(0);
       notifyListeners();
+
+      // Kill-switch: if VPN drops unexpectedly (not user-initiated),
+      // try to reconnect once.  A second unexpected drop stops to avoid a loop.
+      if (prev == ConnStatus.connected &&
+          s == ConnStatus.disconnected &&
+          !_userDisconnected &&
+          killSwitch &&
+          !_reconnecting) {
+        _reconnecting = true;
+        Future.delayed(const Duration(seconds: 2), () async {
+          if (!_userDisconnected && killSwitch) await connect();
+          _reconnecting = false;
+        });
+      }
     });
     engine.onStats((s) {
       stats = s;
@@ -90,10 +113,14 @@ class AppState extends ChangeNotifier {
     }
     final ok = await engine.requestPermission();
     if (!ok) return 'permission_needed';
+    _userDisconnected = false;
     status = ConnStatus.connecting;
     notifyListeners();
     try {
-      await engine.connect(server, proxyOnly: proxyOnly, socksPort: localProxyPort);
+      await engine.connect(server,
+          proxyOnly: proxyOnly,
+          socksPort: localProxyPort,
+          blockedApps: blockedApps);
     } catch (_) {
       // If the core throws while starting, never leave the UI stuck on
       // "connecting" — reset to disconnected so the user can retry.
@@ -104,7 +131,10 @@ class AppState extends ChangeNotifier {
     return null;
   }
 
-  Future<void> disconnect() => engine.disconnect();
+  Future<void> disconnect() async {
+    _userDisconnected = true;
+    await engine.disconnect();
+  }
 
   /// Returns an error key (for S.t) when starting fails, else null.
   Future<String?> toggle() async {
@@ -162,6 +192,12 @@ class AppState extends ChangeNotifier {
   void _stopAutoPing() {
     _pingTimer?.cancel();
     _pingTimer = null;
+  }
+
+  @override
+  void dispose() {
+    _pingTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> setAutoPing(bool v) async {
@@ -241,11 +277,27 @@ class AppState extends ChangeNotifier {
   Future<void> setProxyOnly(bool v) async {
     proxyOnly = v;
     await _persistSettings();
+    // Reconnect immediately if already connected so the new mode takes effect.
+    if (isConnected || isConnecting) {
+      await disconnect();
+      await connect();
+    }
   }
 
   Future<void> setKillSwitch(bool v) async {
     killSwitch = v;
     await _persistSettings();
+  }
+
+  Future<void> setBlockedApps(List<String> apps) async {
+    blockedApps = apps;
+    await storage.saveBlockedApps(apps);
+    // Reconnect if connected so the new per-app rules take effect.
+    if (isConnected || isConnecting) {
+      await disconnect();
+      await connect();
+    }
+    notifyListeners();
   }
 
   Future<void> _persistServers() async {

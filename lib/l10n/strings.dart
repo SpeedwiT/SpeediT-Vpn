@@ -89,6 +89,9 @@ class S {
       'copied': 'کپی شد',
       'invalid_port': 'پورت باید بین ۱۰۲۴ تا ۶۵۵۳۵ باشد',
       'connection_failed': 'خطا در شروع اتصال. لطفاً دوباره امتحان کنید.',
+      'search_apps': 'جستجوی اپ‌ها…',
+      'per_app_hint_detail': 'اپ‌های انتخاب‌شده از تانل VPN خارج می‌شوند و مستقیماً به اینترنت متصل می‌شوند (split tunnel).',
+      'per_app_selected': '{n} اپ خارج از تانل',
     },
     'en': {
       'app_name': 'SpeediT',
@@ -165,6 +168,9 @@ class S {
       'copied': 'Copied',
       'invalid_port': 'Port must be between 1024 and 65535',
       'connection_failed': 'Failed to start the connection. Please try again.',
+      'search_apps': 'Search apps…',
+      'per_app_hint_detail': 'Selected apps bypass the VPN tunnel and connect to the internet directly (split tunnel).',
+      'per_app_selected': '{n} apps excluded from tunnel',
     },
   };
 }
