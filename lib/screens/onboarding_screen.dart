@@ -43,7 +43,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   ),
                   const SizedBox(height: 22),
-                  Text('SpeediT',
+                  Text('V2hype',
                       style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900, color: c.text, letterSpacing: -1)),
                   const SizedBox(height: 28),
                   Text(_lang == 'fa' ? 'زبان را انتخاب کنید' : 'Choose your language',

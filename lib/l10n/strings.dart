@@ -15,7 +15,7 @@ class S {
 
   static const Map<String, Map<String, String>> _data = {
     'fa': {
-      'app_name': 'SpeediT',
+      'app_name': 'V2hype',
       'tab_home': 'خانه',
       'tab_servers': 'سرورها',
       'tab_subs': 'اشتراک‌ها',
@@ -62,7 +62,7 @@ class S {
       'channel': 'کانال تلگرام',
       'developer': 'سازنده',
       'version': 'نسخه',
-      'about_desc': 'کلاینت VPN سریع، امن و چندپروتکلی SpeediT.',
+      'about_desc': 'کلاینت VPN سریع، امن و چندپروتکلی V2hype.',
       'open_channel': 'باز کردن کانال',
       'added': 'اضافه شد',
       'invalid_link': 'لینک نامعتبر است',
@@ -79,7 +79,7 @@ class S {
       'auto_ping': 'تست پینگ خودکار',
       'auto_ping_hint': 'هر ۵ دقیقه به‌صورت خودکار پینگ همه‌ی سرورها گرفته می‌شود.',
       'pinging': 'در حال تست پینگ…',
-      'copyright': '© ۱۴۰۴ Speed iT — تمام حقوق محفوظ است.',
+      'copyright': '© ۱۴۰۴ V2hype — تمام حقوق محفوظ است.',
       'conn_log': 'گزارش اتصال',
       'conn_log_empty': 'هنوز رویدادی ثبت نشده است.',
       'local_proxy': 'پروکسی محلی (SOCKS5)',
@@ -94,7 +94,7 @@ class S {
       'per_app_selected': '{n} اپ خارج از تانل',
     },
     'en': {
-      'app_name': 'SpeediT',
+      'app_name': 'V2hype',
       'tab_home': 'Home',
       'tab_servers': 'Servers',
       'tab_subs': 'Subscriptions',
@@ -141,7 +141,7 @@ class S {
       'channel': 'Telegram channel',
       'developer': 'Developer',
       'version': 'Version',
-      'about_desc': 'SpeediT — a fast, secure, multi-protocol VPN client.',
+      'about_desc': 'V2hype — a fast, secure, multi-protocol VPN client.',
       'open_channel': 'Open channel',
       'added': 'Added',
       'invalid_link': 'Invalid link',
@@ -158,7 +158,7 @@ class S {
       'auto_ping': 'Auto ping test',
       'auto_ping_hint': 'Automatically pings all servers every 5 minutes.',
       'pinging': 'Pinging…',
-      'copyright': '© 2025 Speed iT — All rights reserved.',
+      'copyright': '© 2025 V2hype — All rights reserved.',
       'conn_log': 'Connection log',
       'conn_log_empty': 'No events yet.',
       'local_proxy': 'Local proxy (SOCKS5)',

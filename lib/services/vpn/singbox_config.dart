@@ -24,7 +24,7 @@ class SingboxConfig {
         {
           'type': 'tun',
           'tag': 'tun-in',
-          'interface_name': interfaceName ?? 'speedit',
+          'interface_name': interfaceName ?? 'v2hype',
           'address': ['172.19.0.1/30'],
           'auto_route': true,
           'strict_route': true,

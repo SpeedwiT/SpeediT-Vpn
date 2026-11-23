@@ -19,17 +19,17 @@ Future<void> main() async {
   final storage = await Storage.open();
   final state = AppState(storage, VpnEngine.create());
   await state.init();
-  runApp(ChangeNotifierProvider.value(value: state, child: const SpeediTApp()));
+  runApp(ChangeNotifierProvider.value(value: state, child: const V2hypeApp()));
 }
 
-class SpeediTApp extends StatelessWidget {
-  const SpeediTApp({super.key});
+class V2hypeApp extends StatelessWidget {
+  const V2hypeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     return MaterialApp(
-      title: 'SpeediT',
+      title: 'V2hype',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),

@@ -30,7 +30,7 @@ class AndroidEngine implements VpnEngine {
     });
     await _v2ray.initializeV2Ray(
       notificationIconResourceType: 'drawable',
-      notificationIconResourceName: 'ic_stat_speedit',
+      notificationIconResourceName: 'ic_stat_v2hype',
     );
     _inited = true;
   }

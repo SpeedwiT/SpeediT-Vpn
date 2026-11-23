@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-/// SpeediT theme — a clean black & white design system with depth and motion.
+/// V2hype theme — a clean black & white design system with depth and motion.
 class AppTheme {
   static ThemeData dark() => _build(const AppColors(Brightness.dark));
   static ThemeData light() => _build(const AppColors(Brightness.light));

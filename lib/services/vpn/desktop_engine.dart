@@ -53,7 +53,7 @@ class DesktopEngine implements VpnEngine {
     } else {
       cfg = SingboxConfig.build(server.link);
     }
-    final dir = await Directory.systemTemp.createTemp('speedit_');
+    final dir = await Directory.systemTemp.createTemp('v2hype_');
     final cfgFile = File('${dir.path}${Platform.pathSeparator}config.json');
     await cfgFile.writeAsString(const JsonEncoder.withIndent('  ').convert(cfg));
 

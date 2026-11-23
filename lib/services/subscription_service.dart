@@ -11,7 +11,7 @@ import '../models/proxy_server.dart';
 class SubscriptionService {
   static Future<List<ProxyServer>> fetch(String url, {String? subscriptionId}) async {
     final res = await http
-        .get(Uri.parse(url), headers: {'User-Agent': 'SpeediT/1.0'})
+        .get(Uri.parse(url), headers: {'User-Agent': 'V2hype/1.0'})
         .timeout(const Duration(seconds: 20));
     if (res.statusCode < 200 || res.statusCode >= 300) {
       throw Exception('HTTP ${res.statusCode}');

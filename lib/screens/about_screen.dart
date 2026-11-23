@@ -5,9 +5,9 @@ import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
 import '../widgets/ui_kit.dart';
 
-const String kChannel = '@Speedw_IT';
-const String kChannelUrl = 'https://t.me/Speedw_IT';
-const String kDeveloper = 'Speed iT';
+const String kChannel = '@v2hype';
+const String kChannelUrl = 'https://t.me/v2hype';
+const String kDeveloper = 'V2hype';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -40,7 +40,7 @@ class AboutScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Center(
-              child: Text('SpeediT',
+              child: Text('V2hype',
                   style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: c.text, letterSpacing: -1)),
             ),
             const SizedBox(height: 6),

@@ -64,7 +64,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             const BrandMark(size: 42),
             const SizedBox(width: 10),
-            Text('SpeediT',
+            Text('V2hype',
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: c.text, letterSpacing: -0.5)),
             const Spacer(),
             IconButton(
