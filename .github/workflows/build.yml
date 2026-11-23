@@ -1,4 +1,4 @@
-name: Build SpeediT
+name: Build V2hype
 
 on:
   push:
@@ -28,10 +28,10 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Scaffold android platform + apply SpeediT overlay
+      - name: Scaffold android platform + apply V2hype overlay
         run: |
           cp pubspec.yaml /tmp/pubspec.yaml
-          flutter create . --org com.speedit --project-name speedit --platforms=android
+          flutter create . --org com.speedit --project-name v2hype --platforms=android
           cp /tmp/pubspec.yaml pubspec.yaml
           bash tool/apply_overlay.sh
 
@@ -51,9 +51,9 @@ jobs:
       - name: Rename artifacts
         run: |
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk   dist/SpeediT-android-arm64-v8a.apk
-          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk dist/SpeediT-android-armeabi-v7a.apk || true
-          cp build/app/outputs/flutter-apk/app-x86_64-release.apk      dist/SpeediT-android-x86_64.apk || true
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk   dist/V2hype-android-arm64-v8a.apk
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk dist/V2hype-android-armeabi-v7a.apk || true
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk      dist/V2hype-android-x86_64.apk || true
 
       - uses: actions/upload-artifact@v4
         with:
@@ -77,7 +77,7 @@ jobs:
         run: |
           cp pubspec.yaml /tmp/pubspec.yaml
           flutter config --enable-windows-desktop
-          flutter create . --org com.speedit --project-name speedit --platforms=windows
+          flutter create . --org com.speedit --project-name v2hype --platforms=windows
           cp /tmp/pubspec.yaml pubspec.yaml
 
       - name: Dependencies
@@ -101,12 +101,12 @@ jobs:
         shell: pwsh
         run: |
           $rel = "build/windows/x64/runner/Release"
-          Compress-Archive -Path "$rel/*" -DestinationPath "SpeediT-windows-x64.zip" -Force
+          Compress-Archive -Path "$rel/*" -DestinationPath "V2hype-windows-x64.zip" -Force
 
       - uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: SpeediT-windows-x64.zip
+          path: V2hype-windows-x64.zip
 
   # ------------------------------------------------------------------ Release
   release:
@@ -131,6 +131,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.0
-          name: SpeediT v1.0.0
+          name: V2hype v1.0.0
           files: dist/*
           generate_release_notes: true
